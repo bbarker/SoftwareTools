@@ -4,13 +4,12 @@ use std::io::Write;
 
 use read_byte_slice::{ByteSliceIter, FallibleStreamingIterator};
 
-fn main() -> std::io::Result<()> {
+fn main() -> () {
     let mut args = env::args();
     args.next();
     let src = args.next().expect("cp: missing source");
     let dst = args.next().expect("cp: missing destination");
     cp(src, dst);
-    Ok(())
 }
 
 fn cp(src: String, dst: String) -> () {

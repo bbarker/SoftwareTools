@@ -1,0 +1,20 @@
+[package]
+name = "sfw-tools"
+version = "0.1.0"
+authors = ["Brandon Barker <beb82@cornell.edu>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[[bin]]
+name = "cp"
+path = "src/cp.rs"
+
+# Add more [[bin]] entries as needed:
+
+# [[bin]]
+# name = "wc"
+# path = "src/wc.rs"
+
+[dependencies]
+read-byte-slice = "0.1.2"

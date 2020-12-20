@@ -1,14 +1,20 @@
 [package]
 name = "sfw-tools"
 version = "0.1.0"
-authors = ["Brandon Barker <beb82@cornell.edu>"]
+authors = ["Brandon Barker <brandon.barker@gmail.com>"]
 edition = "2018"
+license-file = "LICENSE.txt"
+categories = ["command-line-utilities"]
 
 [profile.release]
 lto = true
 codegen-units = 1
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+name = "sfwtools"
+path = "src/sfwtools.rs"
 
 [[bin]]
 name = "cp"

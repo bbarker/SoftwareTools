@@ -17,6 +17,10 @@ name = "sfwtools"
 path = "src/sfwtools.rs"
 
 [[bin]]
+name = "sfwtools"
+path = "src/main.rs"
+
+[[bin]]
 name = "cp"
 path = "src/cp.rs"
 

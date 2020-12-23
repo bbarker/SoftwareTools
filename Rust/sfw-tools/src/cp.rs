@@ -1,7 +1,7 @@
 #![deny(unused_must_use)]
 
-use std::env;
 use sfwtools::cp;
+use std::env;
 
 fn main() -> () {
     let mut args = env::args();

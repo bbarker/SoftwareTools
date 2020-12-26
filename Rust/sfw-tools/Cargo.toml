@@ -32,3 +32,6 @@ path = "src/cp.rs"
 
 [dependencies]
 read-byte-slice = "0.1.2"
+
+[dev-dependencies.cargo-husky]
+features = ["precommit-hook", "run-cargo-test", "run-cargo-clippy", "run-cargo-fmt"]

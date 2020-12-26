@@ -3,7 +3,7 @@
 use sfwtools::cp;
 use std::env;
 
-fn main() -> () {
+fn main() {
     let mut args = env::args();
     args.next();
     let src = args.next().expect("cp: missing source");

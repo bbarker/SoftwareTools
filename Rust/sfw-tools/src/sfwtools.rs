@@ -1,3 +1,4 @@
+#![feature(const_fn)]
 #![deny(unused_must_use)]
 
 use std::env;
@@ -28,7 +29,7 @@ pub fn cp(src: String, dst: String) -> Result<(), Error> {
 
     f_in_iter.for_each(|b_slice| {
         f_out
-            .write(b_slice)
+            .write_all(b_slice)
             .expect(&format!("Failure writing to {}.", &dst));
     })
 }
@@ -38,8 +39,6 @@ const USER_ERROR_CODE: i32 = 1;
 pub trait SfwRes<T, E: Display> {
     fn unwrap_or_else<F: FnOnce(E) -> T>(self, op: F) -> T;
 
-    // you can write a trait of your own and implement that trait for
-    // Result<T, E> where E: Display
     fn user_err(self, fstr: &str) -> T
     where
         Self: Sized,

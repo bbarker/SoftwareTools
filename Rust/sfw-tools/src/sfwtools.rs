@@ -20,8 +20,8 @@ pub fn get_args() -> Result<(String, Vec<String>), Error> {
 }
 
 pub fn cp(src: String, dst: String) -> Result<(), Error> {
-    let f_in =
-        File::open(&src).unwrap_or_else(|_| panic!("Couldn't open source: {}", &src));
+    let f_in = File::open(&src)
+        .unwrap_or_else(|_| panic!("Couldn't open source: {}", &src));
 
     let f_in_iter = ByteSliceIter::new(f_in, 4096);
     let mut f_out = File::create(&dst)

@@ -1,4 +1,3 @@
-#![feature(const_fn)]
 #![deny(unused_must_use)]
 #![feature(try_trait)]
 
@@ -11,6 +10,8 @@ use std::io::{Error, ErrorKind::InvalidInput};
 use std::option::NoneError;
 use std::process;
 
+use std::io::{self, BufRead, BufReader, Read};
+
 use read_byte_slice::{ByteSliceIter, FallibleStreamingIterator};
 
 pub fn get_args() -> Result<(String, Vec<String>), Error> {
@@ -22,6 +23,7 @@ pub fn get_args() -> Result<(String, Vec<String>), Error> {
     Ok((cmd, args_out))
 }
 
+/// TODO: refactor to have a cp_file that will take File parameters directly
 pub fn cp(src: &str, dst: &str) -> Result<(), Error> {
     let f_in =
         File::open(&src).user_err(&*format!("Couldn't open source: {}", &src));
@@ -36,6 +38,36 @@ pub fn cp(src: &str, dst: &str) -> Result<(), Error> {
             .user_err(&*format!("Failure writing to {}.", &dst));
     })
 }
+
+pub fn wc(src: &str) {
+    let f_in =
+        File::open(&src).user_err(&*format!("Couldn't open source: {}", &src));
+    println!("{}", wc_file(&f_in))
+}
+
+pub const fn is_newline(bt: u8) -> bool {
+    bt == b'\n'
+}
+
+/// In Chapter 1, page 15 of Software Tools, the authors discuss the
+/// hazards of boundary conditions in programming. Certainly this is still
+/// a problem in Rust, but using Rust's functional programming facilities,
+/// and types can help to greatly reduce the occurrence of such errors.
+pub fn wc_file(f_in: &File) -> u32 {
+    todo!();
+    ();
+
+    // let f_in_iter = ByteSliceIter::new(f_in, 4096);
+    // f_in_iter.collect().iter().fold(0, |b_slice|
+    //     b_slice.iter().fold(0, |ac, bt| if is_newline(*bt) {ac+1} else {ac})
+    // )
+}
+
+// put trait FallibleStreamingIteratorRich<T> {
+//     // TODO: merge upstream as method
+//     // TODO: const_fn
+//     fn fold_fsi(it: Self, );
+// }
 
 pub struct NoneErrorRich(NoneError);
 const NONE_ERROR_RICH: NoneErrorRich = NoneErrorRich(NoneError);
@@ -83,5 +115,52 @@ impl<T, E: Display> SfwRes<T, E> for Result<T, E> {
 impl<T> SfwRes<T, NoneErrorRich> for Option<T> {
     fn unwrap_or_else<F: FnOnce(NoneErrorRich) -> T>(self, op: F) -> T {
         self.unwrap_or_else(|| op(NONE_ERROR_RICH))
+    }
+}
+
+pub struct BytesIter<R: Read> {
+    buf_reader: BufReader<R>,
+    buf: Vec<u8>,
+    /// Since Iterator returns an Option instead of an Error,
+    /// we log the error here, should it occur.
+    error: Option<io::Error>,
+}
+
+/// Inspired by ByteSliceIter, but using new and improved std Iterator trait
+/// One downside is that we must clone the buffer due to Iterator's next signature,
+/// which only permits returning `Option<Self::Item>` and *not* `&Option<Self::Item>`.
+/// Thus, for applications where the returned buffer slice is only read and not
+/// consumed, it may be more efficient to use ByteSliceIter or related approaches.
+impl<R: Read> BytesIter<R> {
+    /// The default size in std [is 8 * 1024](https://github.com/rust-lang/rust/blob/6ccfe68076abc78392ab9e1d81b5c1a2123af657/src/libstd/sys_common/io.rs#L10).
+    pub fn new(reader: R, size: usize) -> BytesIter<R> {
+        BytesIter {
+            buf_reader: BufReader::with_capacity(size, reader),
+            buf: Vec::with_capacity(size),
+            error: None,
+        }
+    }
+}
+
+impl<R: Read> Iterator for BytesIter<R> {
+    type Item = Vec<u8>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let buf_len = self.buf.len();
+        if buf_len > 0 {
+            self.buf_reader.consume(buf_len);
+            self.buf.clear();
+        }
+        let buf_len = self.buf_reader.buffer().len();
+        match self.buf_reader.fill_buf() {
+            Ok(buf) => {
+                self.buf.extend_from_slice(&buf);
+                Some(self.buf.clone())
+            }
+            Err(err) => {
+                self.error = Some(err);
+                None
+            }
+        }
     }
 }

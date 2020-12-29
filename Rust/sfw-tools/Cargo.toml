@@ -24,11 +24,9 @@ path = "src/main.rs"
 name = "cp"
 path = "src/cp.rs"
 
-# Add more [[bin]] entries as needed:
-
-# [[bin]]
-# name = "wc"
-# path = "src/wc.rs"
+[[bin]]
+name = "wc"
+path = "src/wc.rs"
 
 # [dependencies]
 

@@ -43,7 +43,6 @@ impl<R: Read> Iterator for BytesIter<R> {
     }
 }
 
-
 // Copyright (c) 2017 Ted Mielczarek
 #[cfg(test)]
 mod tests {
@@ -132,4 +131,3 @@ slice.chunks produced {} chunks with lengths: {:?}",
         test(bytes, size);
     }
 }
-

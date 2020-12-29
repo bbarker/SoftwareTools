@@ -153,7 +153,7 @@ impl<T> SfwResError<T> for Option<T> {
     fn sfw_err(self, fstr: &str) -> Result<T, Error> {
         match self {
             Some(s) => Ok(s),
-            None => Err(Error::new(NotFound, format!("{}", fstr))),
+            None => Err(Error::new(NotFound, fstr)),
         }
     }
 }

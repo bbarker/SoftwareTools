@@ -1,12 +1,8 @@
-use std::io::Read;
-use std::io::{self, BufRead, BufReader};
+use std::io::{BufRead, BufReader, Error, Read};
 
 pub struct BytesIter<R: Read> {
     buf_reader: BufReader<R>,
     buf: Vec<u8>,
-    /// Since Iterator returns an Option instead of an Error,
-    /// we log the error here, should it occur.
-    error: Option<io::Error>,
 }
 
 /// Inspired by ByteSliceIter, but using new and improved std Iterator trait
@@ -20,13 +16,12 @@ impl<R: Read> BytesIter<R> {
         BytesIter {
             buf_reader: BufReader::with_capacity(size, reader),
             buf: Vec::with_capacity(size),
-            error: None,
         }
     }
 }
 
 impl<R: Read> Iterator for BytesIter<R> {
-    type Item = Vec<u8>;
+    type Item = Result<Vec<u8>, Error>;
 
     fn next(&mut self) -> Option<Self::Item> {
         let buf_len = self.buf.len();
@@ -34,16 +29,103 @@ impl<R: Read> Iterator for BytesIter<R> {
             self.buf_reader.consume(buf_len);
             self.buf.clear();
         }
-        let buf_len = self.buf_reader.buffer().len();
         match self.buf_reader.fill_buf() {
             Ok(buf) => {
-                self.buf.extend_from_slice(&buf);
-                Some(self.buf.clone())
+                if !buf.is_empty() {
+                    self.buf.extend_from_slice(&buf);
+                    Some(Ok(self.buf.clone()))
+                } else {
+                    None
+                }
             }
-            Err(err) => {
-                self.error = Some(err);
-                None
-            }
+            Err(err) => Some(Err(err)),
         }
+    }
+}
+
+// Copyright (c) 2017 Ted Mielczarek
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    use std::env;
+    use std::env::consts::EXE_EXTENSION;
+    use std::path::Path;
+    use std::process::Command;
+
+    const DEFAULT_BUF_SIZE: usize = 8 * 1024;
+
+    #[test]
+    fn readme_test() {
+        let rustdoc = Path::new("rustdoc").with_extension(EXE_EXTENSION);
+        let readme = Path::new(file!())
+            .parent()
+            .unwrap()
+            .parent()
+            .unwrap()
+            .join("README.md");
+        let exe = env::current_exe().unwrap();
+        let outdir = exe.parent().unwrap();
+        let mut cmd = Command::new(rustdoc);
+        cmd.args(&["--verbose", "--test", "-L"])
+            .arg(&outdir)
+            .arg(&readme);
+        println!("{:?}", cmd);
+        let result = cmd
+            .spawn()
+            .expect("Failed to spawn process")
+            .wait()
+            .expect("Failed to run process");
+        assert!(
+            result.success(),
+            "Failed to run rustdoc tests on README.md!"
+        );
+    }
+
+    fn sliced(b: &[u8], size: usize) -> Vec<Vec<u8>> {
+        let mut v = vec![];
+        let mut iter = BytesIter::new(b, size);
+        while let Some(chunk) = iter.next() {
+            v.push(chunk.to_owned());
+        }
+        v
+    }
+
+    fn test<T: AsRef<[u8]>>(bytes: T, size: usize) {
+        let bytes = bytes.as_ref();
+        let a = sliced(bytes, size);
+        let b = bytes.chunks(size).collect::<Vec<_>>();
+        if a != b {
+            panic!(
+                "chunks are not equal!
+read-byte-slice produced {} chunks with lengths: {:?}
+slice.chunks produced {} chunks with lengths: {:?}",
+                a.len(),
+                a.iter().map(|c| c.len()).collect::<Vec<_>>(),
+                b.len(),
+                b.iter().map(|c| c.len()).collect::<Vec<_>>()
+            );
+        }
+    }
+
+    #[test]
+    fn test_simple() {
+        let bytes = b"0123456789abcdef";
+        test(bytes, 4);
+    }
+
+    #[test]
+    fn test_non_even() {
+        let bytes = b"0123456789abcd";
+        test(bytes, 4);
+    }
+
+    #[test]
+    fn test_chunks_larger_than_bufread_default_buffer() {
+        let bytes = (0..DEFAULT_BUF_SIZE * 4)
+            .map(|i| (i % 256) as u8)
+            .collect::<Vec<u8>>();
+        let size = DEFAULT_BUF_SIZE * 2;
+        test(bytes, size);
     }
 }

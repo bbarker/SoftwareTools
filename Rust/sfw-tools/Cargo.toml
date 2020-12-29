@@ -30,9 +30,7 @@ path = "src/cp.rs"
 # name = "wc"
 # path = "src/wc.rs"
 
-[dependencies]
-read-byte-slice = "0.1.2"
-
+# [dependencies]
 
 [dev-dependencies.cargo-husky]
 version = "1.5.0"

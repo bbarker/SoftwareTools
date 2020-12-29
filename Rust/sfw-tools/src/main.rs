@@ -1,6 +1,6 @@
 #![deny(unused_must_use)]
 
-use sfwtools::{exit, get_args, run_cp, SfwRes};
+use sfwtools::{get_args, run_cp, user_exit, SfwRes};
 use std::ffi::OsStr;
 use std::path::Path;
 
@@ -14,8 +14,8 @@ fn main() {
             let dst = args.get(1).user_err("cp: missing destination");
             run_cp(&src, &dst);
         }
-        Some(u) => exit(&*format!("Unknown sfwtools command: {}", u)),
-        None => exit("No command passed to sfwtools, exiting."),
+        Some(u) => user_exit(&*format!("Unknown sfwtools command: {}", u)),
+        None => user_exit("No command passed to sfwtools, exiting."),
     }
 
     // let src = args.next().expect("cp: missing source");

@@ -9,9 +9,8 @@ use std::io::{Error, ErrorKind::InvalidInput, Write};
 use std::option::NoneError;
 use std::process;
 
-use read_byte_slice::{ByteSliceIter, FallibleStreamingIterator};
-
 mod bytes_iter;
+use bytes_iter::BytesIter;
 
 pub fn get_args() -> Result<(String, Vec<String>), Error> {
     let mut args_in = env::args();
@@ -24,17 +23,21 @@ pub fn get_args() -> Result<(String, Vec<String>), Error> {
 
 /// TODO: refactor to have a cp_file that will take File parameters directly
 pub fn cp(src: &str, dst: &str) -> Result<(), Error> {
-    let f_in =
-        File::open(&src).user_err(&*format!("Couldn't open source: {}", &src));
+    let f_in = File::open(&src).map_err(|err| {
+        Error::new(
+            InvalidInput,
+            format!("Couldn't open source: {}. Details: {}", &src, err),
+        )
+    })?;
+    // user_err(&*format!("Couldn't open source: {}", &src));
 
-    let f_in_iter = ByteSliceIter::new(f_in, 4096);
+    let mut f_in_iter = BytesIter::new(f_in, 4096);
     let mut f_out = File::create(&dst)
         .user_err(&*format!("Couldn't open destination: {}", &dst));
 
-    f_in_iter.for_each(|b_slice| {
-        f_out
-            .write_all(b_slice)
-            .user_err(&*format!("Failure writing to {}.", &dst));
+    f_in_iter.try_for_each(|b_slice_res| match b_slice_res {
+        Ok(b_slice) => f_out.write_all(&b_slice),
+        Err(err) => Err(err),
     })
 }
 
@@ -86,7 +89,7 @@ pub fn run_cp(src: &str, dst: &str) {
 
 const USER_ERROR_CODE: i32 = 1;
 
-pub fn exit(msg: &str) {
+pub fn user_exit(msg: &str) {
     eprintln!("{}", msg);
     process::exit(USER_ERROR_CODE)
 }

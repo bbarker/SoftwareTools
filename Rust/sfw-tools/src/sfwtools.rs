@@ -41,14 +41,15 @@ pub fn cp(src: &str, dst: &str) -> Result<(), Error> {
     })
 }
 
+pub const fn is_newline(bt: u8) -> bool {
+    bt == b'\n'
+}
+
+/*
 pub fn wc(src: &str) {
     let f_in =
         File::open(&src).user_err(&*format!("Couldn't open source: {}", &src));
     println!("{}", wc_file(&f_in))
-}
-
-pub const fn is_newline(bt: u8) -> bool {
-    bt == b'\n'
 }
 
 /// In Chapter 1, page 15 of Software Tools, the authors discuss the
@@ -64,6 +65,7 @@ pub fn wc_file(f_in: &File) -> u32 {
     //     b_slice.iter().fold(0, |ac, bt| if is_newline(*bt) {ac+1} else {ac})
     // )
 }
+*/
 
 // put trait FallibleStreamingIteratorRich<T> {
 //     // TODO: merge upstream as method

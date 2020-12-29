@@ -43,7 +43,6 @@ impl<R: Read> Iterator for BytesIter<R> {
     }
 }
 
-/*
 
 // Copyright (c) 2017 Ted Mielczarek
 #[cfg(test)]
@@ -57,6 +56,7 @@ mod tests {
 
     const DEFAULT_BUF_SIZE: usize = 8 * 1024;
 
+    /*
     #[test]
     fn readme_test() {
         let rustdoc = Path::new("rustdoc").with_extension(EXE_EXTENSION);
@@ -83,12 +83,13 @@ mod tests {
             "Failed to run rustdoc tests on README.md!"
         );
     }
+    */
 
     fn sliced(b: &[u8], size: usize) -> Vec<Vec<u8>> {
         let mut v = vec![];
         let mut iter = BytesIter::new(b, size);
         while let Some(chunk) = iter.next() {
-            v.push(chunk.to_owned());
+            v.push(chunk.unwrap().to_owned());
         }
         v
     }
@@ -132,4 +133,3 @@ slice.chunks produced {} chunks with lengths: {:?}",
     }
 }
 
-*/

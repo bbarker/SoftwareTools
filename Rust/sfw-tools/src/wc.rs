@@ -1,6 +1,6 @@
 #![deny(unused_must_use)]
 
-use sfwtools::run_wc;
+use sfwtools::counting::run_wc;
 use sfwtools::SfwRes;
 use std::env;
 

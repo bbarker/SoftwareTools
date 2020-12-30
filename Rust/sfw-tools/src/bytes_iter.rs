@@ -48,10 +48,10 @@ impl<R: Read> Iterator for BytesIter<R> {
 mod tests {
     use super::*;
 
-    use std::env;
-    use std::env::consts::EXE_EXTENSION;
-    use std::path::Path;
-    use std::process::Command;
+    // use std::env;
+    // use std::env::consts::EXE_EXTENSION;
+    // use std::path::Path;
+    // use std::process::Command;
 
     const DEFAULT_BUF_SIZE: usize = 8 * 1024;
 

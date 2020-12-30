@@ -3,17 +3,16 @@ use std::io::{Error, ErrorKind::*};
 use std::option::NoneError;
 use std::process;
 
+const USER_ERROR_CODE: i32 = 1;
+
 pub struct NoneErrorRich(NoneError);
 const NONE_ERROR_RICH: NoneErrorRich = NoneErrorRich(NoneError);
-
 //
 impl fmt::Display for NoneErrorRich {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "")
     }
 }
-
-const USER_ERROR_CODE: i32 = 1;
 
 pub fn user_exit(msg: &str) {
     eprintln!("{}", msg);

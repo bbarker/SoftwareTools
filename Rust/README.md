@@ -26,6 +26,21 @@ Higher-order-functions (HOFs) are frequently used to reduce code
 complexity, verbosity, and the risk of errors. Primary examples are
 `map`, `for_each` (like `map` but effectful), and `fold`.
 
+## Dependencies
+
+Since the goal is to make the software both as self-contained and
+as illustrative as possible, we've tried to rely on very few dependencies.
+The following exceptions exist:
+
+- [fp-core](https://docs.rs/fp-core/0.1.9/fp_core/)
+  This is what one would typically find as part the standard library
+  in a functional language, so we have included it here. Though Rust is functional
+  in a sense — it has lamda functions (i.e. Rust closures) and the stand library
+  has many higher-order functions (HOFs) — its standard library doesn't include
+  traits that are commonly found to be helpful abstracts in functional languages.
+  We will use a few of these where it is particularly illustrative or sensible,
+  but will stick with idiomatic Rust where that is obviously simpler.
+
 ## Build
 
 Currently, do generate small builds the following commands

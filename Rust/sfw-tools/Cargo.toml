@@ -28,8 +28,8 @@ path = "src/cp.rs"
 name = "wc"
 path = "src/wc.rs"
 
-# [dependencies]
-# error-chain = "0.12.4"
+[dependencies]
+fp-core = "0.1.9"
 
 [dev-dependencies.cargo-husky]
 version = "1.5.0"

@@ -1,7 +1,7 @@
 use std::fs::File;
 use std::io::Error;
 
-use fp_core::semigroup::*;
+use fp_core::{empty::*, monoid::*, semigroup::*};
 
 use crate::bytes_iter::BytesIter;
 use crate::constants::*;
@@ -59,8 +59,26 @@ struct WordCount {
     count: usize,
 } // TODO: fold over these with monoid implementation
 
-// const WORD_COUNT_0: WordCount = WordCount{current: CharType::IsSpace, count: 0};
+impl From<&u8> for WordCount {
+    fn from(other: &u8) -> Self {
+        WordCount {
+            current: CharType::from(other),
+            count: 0,
+        }
+    }
+}
 
+const WORD_COUNT_0: WordCount = WordCount {
+    current: CharType::IsSpace,
+    count: 0,
+};
+
+impl Empty for WordCount {
+    fn empty() -> Self {
+        WORD_COUNT_0
+    }
+}
+//
 impl Semigroup for WordCount {
     fn combine(self, other: Self) -> Self {
         let new_count = match other.current {
@@ -76,8 +94,16 @@ impl Semigroup for WordCount {
         }
     }
 }
+//
+impl Monoid for WordCount {}
 
-// pub fn word_count
+pub fn word_count(b_slice: &[u8]) -> usize {
+    b_slice
+        .iter()
+        .map(WordCount::from)
+        .fold(Empty::empty(), Semigroup::combine)
+        .count
+}
 
 pub fn num_newlines(b_slice: &[u8]) -> usize {
     b_slice.iter().fold(
@@ -273,37 +299,49 @@ impl From<&[u8]> for FluxMay {
 //     })
 // }
 
-// #[cfg(test)]
-// mod tests {
-//     use super::*;
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-//     #[test]
-//     fn test_flux_over_byte_string() {
-//         assert_eq!(
-//             flux_over_byte_string("testing one two three".as_bytes()),
-//             Some(Flux::new(CharType::NotSpace, 4, 0, CharType::NotSpace))
-//         );
-//     }
+    #[test]
+    fn test_word_count_over_byte_string() {
+        let num_words1 = word_count("testing one\ntwo three".as_bytes());
+        assert_eq!(num_words1, 4);
+        let num_words2 = word_count("testing one\ntwo three\n".as_bytes());
+        assert_eq!(num_words2, 4);
+        let num_words3 = word_count("\ntesting one\ntwo three".as_bytes());
+        assert_eq!(num_words3, 4);
+        let num_words4 = word_count(" testing one  two three\n  ".as_bytes());
+        assert_eq!(num_words4, 4);
+    }
 
-//     #[test]
-//     fn test_span_opt_not_space_to_not_space() {
-//         let flux_l = flux_over_byte_string("testing on");
-//         let flux_r = flux_over_byte_string("e two three");
+    //     #[test]
+    //     fn test_flux_over_byte_string() {
+    //         assert_eq!(
+    //             flux_over_byte_string("testing one two three".as_bytes()),
+    //             Some(Flux::new(CharType::NotSpace, 4, 0, CharType::NotSpace))
+    //         );
+    //     }
 
-//         assert_eq!(
-//             span_opt(flux_l, flux_r),
-//             Some(Flux::new(CharType::NotSpace, 4, 0, CharType::NotSpace))
-//         );
-//     }
+    //     #[test]
+    //     fn test_span_opt_not_space_to_not_space() {
+    //         let flux_l = flux_over_byte_string("testing on");
+    //         let flux_r = flux_over_byte_string("e two three");
 
-//     #[test]
-//     fn test_span_opt_space_to_space() {
-//         let flux_l = flux_over_byte_string("testing one ");
-//         let flux_r = flux_over_byte_string(" two three");
+    //         assert_eq!(
+    //             span_opt(flux_l, flux_r),
+    //             Some(Flux::new(CharType::NotSpace, 4, 0, CharType::NotSpace))
+    //         );
+    //     }
 
-//         assert_eq!(
-//             span_opt(flux_l, flux_r),
-//             Some(Flux::new(CharType::NotSpace, 4, 0, CharType::NotSpace))
-//         );
-//     }
-// }
+    //     #[test]
+    //     fn test_span_opt_space_to_space() {
+    //         let flux_l = flux_over_byte_string("testing one ");
+    //         let flux_r = flux_over_byte_string(" two three");
+
+    //         assert_eq!(
+    //             span_opt(flux_l, flux_r),
+    //             Some(Flux::new(CharType::NotSpace, 4, 0, CharType::NotSpace))
+    //         );
+    //     }
+}

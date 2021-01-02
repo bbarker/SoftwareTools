@@ -10,25 +10,63 @@ use crate::util::is_newline;
 
 /// Convenience function for running wc in idiomatic fashion
 /// (i.e.) errors are printed to user and the program exits.
-pub fn run_wc(src: &str) {
-    let wc_res = wc(src).user_err("Error in wc");
+pub fn run_wc_lines(src: &str) {
+    let wc_res = wc_lines(src).user_err("Error in wc_lines");
     println!("{}", wc_res);
 }
 
-pub fn wc(src: &str) -> Result<usize, Error> {
+pub fn wc_lines(src: &str) -> Result<usize, Error> {
     let f_in = File::open(&src)
         .sfw_err(&*format!("Couldn't open source: {}", &src))?;
-    wc_file(&f_in)
+    wc_lines_file(&f_in)
 }
 
 /// In Chapter 1, page 15 of Software Tools, the authors discuss the
 /// hazards of boundary conditions in programming. Certainly this is still
 /// a problem in Rust, but using Rust's functional programming facilities,
 /// and types can help to greatly reduce the occurrence of such errors.
-pub fn wc_file(f_in: &File) -> Result<usize, Error> {
+pub fn wc_lines_file(f_in: &File) -> Result<usize, Error> {
     BytesIter::new(f_in, DEFAULT_BUF_SIZE)
         .try_fold(0_usize, |ac_tot, b_slice| {
             Ok(ac_tot + num_newlines(&b_slice?))
+        })
+}
+
+/// Convenience function for running wc in idiomatic fashion
+/// (i.e.) errors are printed to user and the program exits.
+pub fn run_wc_bytes(src: &str) {
+    let wc_res = wc_bytes(src).user_err("Error in wc_bytes");
+    println!("{}", wc_res);
+}
+
+pub fn wc_bytes(src: &str) -> Result<usize, Error> {
+    let f_in = File::open(&src)
+        .sfw_err(&*format!("Couldn't open source: {}", &src))?;
+    wc_bytes_file(&f_in)
+}
+
+pub fn wc_bytes_file(f_in: &File) -> Result<usize, Error> {
+    BytesIter::new(f_in, DEFAULT_BUF_SIZE)
+        .try_fold(0_usize, |ac_tot, b_slice| Ok(ac_tot + b_slice?.len()))
+}
+
+/// Convenience function for running wc in idiomatic fashion
+/// (i.e.) errors are printed to user and the program exits.
+pub fn run_wc_words(src: &str) {
+    let wc_res = wc_words(src).user_err("Error in wc_words");
+    println!("{}", wc_res);
+}
+
+pub fn wc_words(src: &str) -> Result<usize, Error> {
+    let f_in = File::open(&src)
+        .sfw_err(&*format!("Couldn't open source: {}", &src))?;
+    wc_words_file(&f_in)
+}
+
+pub fn wc_words_file(f_in: &File) -> Result<usize, Error> {
+    BytesIter::new(f_in, DEFAULT_BUF_SIZE)
+        .try_fold(0_usize, |ac_tot, b_slice| {
+            Ok(ac_tot + word_count(b_slice?.as_slice()))
         })
 }
 
@@ -57,7 +95,7 @@ impl From<&u8> for CharType {
 struct WordCount {
     current: CharType,
     count: usize,
-} // TODO: fold over these with monoid implementation
+}
 
 impl From<&u8> for WordCount {
     fn from(other: &u8) -> Self {
@@ -118,12 +156,6 @@ pub fn num_newlines(b_slice: &[u8]) -> usize {
     )
 }
 
-//  All of the Flux-based code below is Copyright (c) 2019 Martin Mroz
-
-/// This is based on a parallel implementation
-/// [by Martin Mroz](https://github.com/martinmroz/wc_rs)
-
-/// The result of the `wc` operation.
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Hash)]
 pub struct Counts {
     pub bytes: usize,
@@ -145,6 +177,10 @@ impl Counts {
 }
 
 /// Representation of a chunk of text.
+///
+/// All of the Flux-based code below is inspired
+/// [by Martin Mroz](https://github.com/martinmroz/wc_rs)
+/// The result of the `wc` operation.
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Hash)]
 struct Flux {
     /// The type of the left-most character in the chunk.
@@ -279,7 +315,20 @@ impl From<&[u8]> for FluxMay {
     }
 }
 
-pub fn wc_all_file<T>(f_in: &File) -> std::io::Result<Counts> {
+/// Convenience function for running wc in idiomatic fashion
+/// (i.e.) errors are printed to user and the program exits.
+pub fn run_wc_all(src: &str) {
+    let wc_res = wc_all(src).user_err("Error in wc_all");
+    println!("{} {} {}", wc_res.bytes, wc_res.words, wc_res.lines);
+}
+
+pub fn wc_all(src: &str) -> Result<Counts, Error> {
+    let f_in = File::open(&src)
+        .sfw_err(&*format!("Couldn't open source: {}", &src))?;
+    wc_all_file(&f_in)
+}
+
+pub fn wc_all_file(f_in: &File) -> Result<Counts, Error> {
     BytesIter::new(f_in, DEFAULT_BUF_SIZE)
         .try_fold(FluxEmpty, |flux_may, b_slice| {
             Ok(Semigroup::combine(

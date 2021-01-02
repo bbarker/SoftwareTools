@@ -163,12 +163,36 @@ impl Flux {
             rightmost_char_type,
         }
     }
+
+    /// Returns a new Flux spanning the receiver on the left, and `rhs` on the right.
+    fn span(self, rhs: Flux) -> Self {
+        let words = {
+            // If the span is formed along a non-space to non-space
+            // boundary the word count is one less than the sum.
+            if let (CharType::NotSpace, CharType::NotSpace) =
+                (self.rightmost_char_type, rhs.leftmost_char_type)
+            {
+                self.words + rhs.words - 1
+            } else {
+                self.words + rhs.words
+            }
+        };
+
+        Flux::new(
+            self.leftmost_char_type,
+            self.bytes + rhs.bytes,
+            words,
+            self.lines + rhs.lines,
+            rhs.rightmost_char_type,
+        )
+    }
 }
 
 enum FluxMay {
     FluxSome(Flux),
     FluxEmpty,
 }
+use FluxMay::*;
 
 impl FluxMay {
     /// Returns a new instance of the receiver with the provided parameters.
@@ -189,28 +213,27 @@ impl FluxMay {
     }
 }
 
-//     /// Returns a new Flux spanning the receiver on the left, and `rhs` on the right.
-//     fn span(self, rhs: Flux) -> Self {
-//         let lines = self.lines + rhs.lines;
-//         let words = {
-//             // If the span is formed along a non-space to non-space boundary the word count is one less than the sum.
-//             if let (CharType::NotSpace, CharType::NotSpace) =
-//                 (self.rightmost_char_type, rhs.leftmost_char_type)
-//             {
-//                 self.words + rhs.words - 1
-//             } else {
-//                 self.words + rhs.words
-//             }
-//         };
-
-//         Flux::new(
-//             self.leftmost_char_type,
-//             words,
-//             lines,
-//             rhs.rightmost_char_type,
-//         )
-//     }
-// }
+impl Empty for FluxMay {
+    fn empty() -> Self {
+        FluxMay::FluxEmpty
+    }
+}
+//
+impl Semigroup for FluxMay {
+    fn combine(self, other: Self) -> Self {
+        match other {
+            FluxEmpty => self,
+            FluxSome(other_flux) => match self {
+                FluxEmpty => other,
+                FluxSome(self_flux) => {
+                    FluxSome(Flux::span(self_flux, other_flux))
+                }
+            },
+        }
+    }
+}
+//
+impl Monoid for FluxMay {}
 
 impl From<&[u8]> for FluxMay {
     /// Creates a new instance of a Flux encoding a buffer.
@@ -227,7 +250,7 @@ impl From<&[u8]> for FluxMay {
             FluxMay::new(
                 first_char,
                 buf.len(),
-                0, /* TODO */
+                word_count(buf),
                 lines,
                 last_char,
             )
@@ -235,12 +258,6 @@ impl From<&[u8]> for FluxMay {
     }
 }
 
-// /// Takes two optional Flux instances and returns, where possible, the span of the two.
-// fn span_opt(lhs: Option<Flux>, rhs: Option<Flux>) -> Option<Flux> {
-//     lhs.map_or(rhs, |left_flux| {
-//         rhs.map(|right_flux| left_flux.span(right_flux))
-//     })
-// }
 
 // /// Computes the flux over the provided input byte string.
 // fn flux_over_byte_string<T>(input: T) -> Option<Flux>

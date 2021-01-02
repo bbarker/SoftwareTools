@@ -125,10 +125,23 @@ pub fn num_newlines(b_slice: &[u8]) -> usize {
 
 /// The result of the `wc` operation.
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Hash)]
-struct Counts {
+pub struct Counts {
     pub bytes: usize,
     pub words: usize,
     pub lines: usize,
+}
+
+impl Counts {
+    fn new(bytes: usize, words: usize, lines: usize) -> Self {
+        Counts {
+            bytes,
+            words,
+            lines,
+        }
+    }
+    fn empty() -> Self {
+        Self::new(0, 0, 0)
+    }
 }
 
 /// Representation of a chunk of text.
@@ -211,6 +224,13 @@ impl FluxMay {
             rightmost_char_type,
         ))
     }
+
+    fn to_counts(&self) -> Counts {
+        match self {
+            FluxSome(flux) => Counts::new(flux.bytes, flux.words, flux.lines),
+            FluxEmpty => Counts::empty(),
+        }
+    }
 }
 
 impl Empty for FluxMay {
@@ -258,63 +278,16 @@ impl From<&[u8]> for FluxMay {
     }
 }
 
-
-// /// Computes the flux over the provided input byte string.
-// fn flux_over_byte_string<T>(input: T) -> Option<Flux>
-// where
-//     T: AsRef<[u8]>,
-// {
-//     input
-//         .as_ref()
-//         .iter()//         .map(Flux::from)
-//         .fold(|| None, |acc, next| span_opt(acc, Some(next)))
-//         .reduce(|| None, |acc, next| span_opt(acc, next))
-// }
-
-// fn wc_all<T>(input: BytesIter) -> std::io::Result<Counts>
-// {
-
-//     // BytesIter::new(f_in, DEFAULT_BUF_SIZE).try_fold(Counts, |ac_tot, b_slice| {
-//     //     let buf = b_slice?;
-//     //     let buf_count = Count { buf.len(),
-//     //     Ok(ac_tot
-//     //         + b_slice?.iter().fold(0u32, |ac, bt| {
-//     //             if is_newline(*bt) {
-//     //                 ac + 1
-//     //             } else {
-//     //                 ac
-//     //             }
-//     //         }))
-//     // })
-
-//     /*
-//     let mut bytes = 0;
-//     let mut flux = None;
-
-//     /*
-//     'buffer_loop: loop {
-//         let buffer = input.fill_buf()?;
-//         let length = buffer.len();
-//         if length == 0 {
-//             break 'buffer_loop;
-//         }
-
-//         // Update the byte counter from the buffer.
-//         bytes = bytes + length;
-
-//         // Fold the flux of the next buffer into the existing.
-//         flux = span_opt(flux, flux_over_byte_string(&buffer));
-
-//         // Mark the buffer as consumed.
-//         input.consume(length);
-//     }
-//     */
-//     Ok(Counts {
-//         bytes,
-//         words: flux.map(|f| f.words).unwrap_or_default(),
-//         lines: flux.map(|f| f.lines).unwrap_or_default(),
-//     })
-// }
+pub fn wc_all_file<T>(f_in: &File) -> std::io::Result<Counts> {
+    BytesIter::new(f_in, DEFAULT_BUF_SIZE)
+        .try_fold(FluxEmpty, |flux_may, b_slice| {
+            Ok(Semigroup::combine(
+                flux_may,
+                FluxMay::from(b_slice?.as_slice()),
+            ))
+        })
+        .map(|f| FluxMay::to_counts(&f))
+}
 
 #[cfg(test)]
 mod tests {

@@ -148,7 +148,7 @@ impl Counts {
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Hash)]
 struct Flux {
     /// The type of the left-most character in the chunk.
-    pub leftmost_char_type: CharType,
+    pub left_char_type: CharType,
     /// The number of bytes in the chunk.
     pub bytes: usize,
     /// The number of words in the chunk.
@@ -156,24 +156,24 @@ struct Flux {
     /// The number of lines in the chunk.
     pub lines: usize,
     /// The type of the right-most character in the chunk.
-    pub rightmost_char_type: CharType,
+    pub right_char_type: CharType,
 }
 
 impl Flux {
     /// Returns a new instance of the receiver with the provided parameters.
     fn new(
-        leftmost_char_type: CharType,
+        left_char_type: CharType,
         bytes: usize,
         words: usize,
         lines: usize,
-        rightmost_char_type: CharType,
+        right_char_type: CharType,
     ) -> Self {
         Flux {
-            leftmost_char_type,
+            left_char_type,
             bytes,
             words,
             lines,
-            rightmost_char_type,
+            right_char_type,
         }
     }
 
@@ -183,7 +183,7 @@ impl Flux {
             // If the span is formed along a non-space to non-space
             // boundary the word count is one less than the sum.
             if let (CharType::NotSpace, CharType::NotSpace) =
-                (self.rightmost_char_type, rhs.leftmost_char_type)
+                (self.right_char_type, rhs.left_char_type)
             {
                 self.words + rhs.words - 1
             } else {
@@ -192,15 +192,16 @@ impl Flux {
         };
 
         Flux::new(
-            self.leftmost_char_type,
+            self.left_char_type,
             self.bytes + rhs.bytes,
             words,
             self.lines + rhs.lines,
-            rhs.rightmost_char_type,
+            rhs.right_char_type,
         )
     }
 }
 
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
 enum FluxMay {
     FluxSome(Flux),
     FluxEmpty,
@@ -210,18 +211,18 @@ use FluxMay::*;
 impl FluxMay {
     /// Returns a new instance of the receiver with the provided parameters.
     fn new(
-        leftmost_char_type: CharType,
+        left_char_type: CharType,
         bytes: usize,
         words: usize,
         lines: usize,
-        rightmost_char_type: CharType,
+        right_char_type: CharType,
     ) -> Self {
         FluxMay::FluxSome(Flux::new(
-            leftmost_char_type,
+            left_char_type,
             bytes,
             words,
             lines,
-            rightmost_char_type,
+            right_char_type,
         ))
     }
 
@@ -305,33 +306,51 @@ mod tests {
         assert_eq!(num_words4, 4);
     }
 
-    //     #[test]
-    //     fn test_flux_over_byte_string() {
-    //         assert_eq!(
-    //             flux_over_byte_string("testing one two three".as_bytes()),
-    //             Some(Flux::new(CharType::NotSpace, 4, 0, CharType::NotSpace))
-    //         );
-    //     }
+    #[test]
+    fn test_flux_may_from() {
+        assert_eq!(
+            FluxMay::from("testing one two three ".as_bytes()),
+            FluxSome(Flux::new(
+                CharType::NotSpace,
+                22,
+                4,
+                0,
+                CharType::IsSpace
+            ))
+        );
+    }
 
-    //     #[test]
-    //     fn test_span_opt_not_space_to_not_space() {
-    //         let flux_l = flux_over_byte_string("testing on");
-    //         let flux_r = flux_over_byte_string("e two three");
+    #[test]
+    fn test_flux_may_combine() {
+        let flux_l = FluxMay::from("testing on".as_bytes());
+        let flux_r = FluxMay::from("e two three".as_bytes());
 
-    //         assert_eq!(
-    //             span_opt(flux_l, flux_r),
-    //             Some(Flux::new(CharType::NotSpace, 4, 0, CharType::NotSpace))
-    //         );
-    //     }
+        assert_eq!(
+            Semigroup::combine(flux_l, flux_r),
+            FluxSome(Flux::new(
+                CharType::NotSpace,
+                21,
+                4,
+                0,
+                CharType::NotSpace
+            ))
+        );
+    }
 
-    //     #[test]
-    //     fn test_span_opt_space_to_space() {
-    //         let flux_l = flux_over_byte_string("testing one ");
-    //         let flux_r = flux_over_byte_string(" two three");
+    #[test]
+    fn test_flux_may_combine_space() {
+        let flux_l = FluxMay::from("testing one ".as_bytes());
+        let flux_r = FluxMay::from(" two three".as_bytes());
 
-    //         assert_eq!(
-    //             span_opt(flux_l, flux_r),
-    //             Some(Flux::new(CharType::NotSpace, 4, 0, CharType::NotSpace))
-    //         );
-    //     }
+        assert_eq!(
+            Semigroup::combine(flux_l, flux_r),
+            FluxSome(Flux::new(
+                CharType::NotSpace,
+                22,
+                4,
+                0,
+                CharType::NotSpace
+            ))
+        );
+    }
 }

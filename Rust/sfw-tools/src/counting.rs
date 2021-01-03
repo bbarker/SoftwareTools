@@ -2,11 +2,31 @@ use std::fs::File;
 use std::io::Error;
 
 use fp_core::{empty::*, monoid::*, semigroup::*};
+use seahorse::App;
 
 use crate::bytes_iter::BytesIter;
 use crate::constants::*;
 use crate::error::*;
 use crate::util::is_newline;
+
+pub fn wc_app() -> App {
+    App::new("wc")
+        .description("wc: line, word, and byte counting")
+        .author("Brandon Elam Barker")
+        .usage(WC_USAGE)
+}
+
+const WC_USAGE: &str = r#"
+wc [[OPTION]]... [FILE]...
+
+No option implies lines, words and bytes will be printed.
+
+Valid options are:
+-c            print the byte counts
+-w            print the word counts
+-l            print the line counts
+
+"#;
 
 /// Convenience function for running wc in idiomatic fashion
 /// (i.e.) errors are printed to user and the program exits.
@@ -319,7 +339,7 @@ impl From<&[u8]> for FluxMay {
 /// (i.e.) errors are printed to user and the program exits.
 pub fn run_wc_all(src: &str) {
     let wc_res = wc_all(src).user_err("Error in wc_all");
-    println!("{} {} {}", wc_res.bytes, wc_res.words, wc_res.lines);
+    println!("{} {} {}", wc_res.lines, wc_res.words, wc_res.bytes);
 }
 
 pub fn wc_all(src: &str) -> Result<Counts, Error> {

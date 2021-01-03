@@ -32,7 +32,7 @@ Since the goal is to make the software both as self-contained and
 as illustrative as possible, we've tried to rely on very few dependencies.
 The following exceptions exist:
 
-- [fp-core](https://docs.rs/fp-core/0.1.9/fp_core/)
+- [fp-core](https://docs.rs/fp-core)
   This is what one would typically find as part the standard library
   in a functional language, so we have included it here. Though Rust is functional
   in a sense — it has lamda functions (i.e. Rust closures) and the stand library
@@ -40,6 +40,16 @@ The following exceptions exist:
   traits that are commonly found to be helpful abstracts in functional languages.
   We will use a few of these where it is particularly illustrative or sensible,
   but will stick with idiomatic Rust where that is obviously simpler.
+- [seahorse](https://docs.rs/seahorse)
+  Seahorse is a minimal argument parser. Judging by some results
+  returned by Google, [clap](https://clap.rs) is far more popular, but
+  has additional dependencies; we are striving for being as portable
+  as possible, so the minimality seemed to line up with that
+  goal. Additionally, Clap doesn't appear to allow passing in argument
+  lists directly, which is useful for maintaining separate commands
+  that build on each other. In any case, argument parsing is only used
+  very late in the application logic, and most of the API could be used
+  without worrying about it.
 
 ## Build
 

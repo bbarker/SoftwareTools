@@ -30,6 +30,7 @@ path = "src/wc.rs"
 
 [dependencies]
 fp-core = "0.1.9"
+seahorse = "1.1.1"
 
 [dev-dependencies.cargo-husky]
 version = "1.5.0"

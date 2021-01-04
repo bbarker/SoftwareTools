@@ -2,18 +2,19 @@ use std::fs::File;
 use std::io::Error;
 
 use fp_core::{empty::*, monoid::*, semigroup::*};
-use seahorse::App;
+use seahorse::{App, Command, Context, Flag, FlagType};
 
 use crate::bytes_iter::BytesIter;
 use crate::constants::*;
 use crate::error::*;
-use crate::util::is_newline;
+use crate::util::{is_newline, opt_as_empty_str};
 
 pub fn wc_app() -> App {
     App::new("wc")
         .description("wc: line, word, and byte counting")
         .author("Brandon Elam Barker")
-        .usage(WC_USAGE)
+        .action(run_wc_seahorse_action)
+        .command(run_wc_seahorse_cmd())
 }
 
 const WC_USAGE: &str = r#"
@@ -28,11 +29,65 @@ Valid options are:
 
 "#;
 
+pub fn run_wc_seahorse_cmd() -> Command {
+    Command::new("wc")
+        .description("wc: line, word, and byte counting")
+        .usage(WC_USAGE)
+        .action(run_wc_seahorse_action)
+        .flag(
+            Flag::new("bytes", FlagType::Bool)
+                .alias("c")
+                .description("wc -c some_file"),
+        )
+        .flag(
+            Flag::new("words", FlagType::Bool)
+                .alias("w")
+                .description("wc -w some_file"),
+        )
+        .flag(
+            Flag::new("lines", FlagType::Bool)
+                .alias("l")
+                .description("wc -l some_file"),
+        )
+}
+
+pub fn run_wc_seahorse_action(ctxt: &Context) {
+    let src = ctxt.args.first().user_err("wc: missing source");
+    let do_bytes = ctxt.bool_flag("bytes");
+    let do_words = ctxt.bool_flag("words");
+    let do_lines = ctxt.bool_flag("words");
+    let do_all = do_lines && do_words && do_bytes;
+    let do_all = do_all || (!do_lines && !do_words && !do_bytes);
+    let counts: Counts;
+    if do_all {
+        counts = wc_all(&src).user_err("Error in wc_all");
+    } else {
+        let mut build_counts = Counts::null();
+        if do_bytes {
+            build_counts = wc_bytes(&src)
+                .map(|b| build_counts.bytes(b))
+                .user_err("Error in wc_bytes");
+        }
+        if do_words {
+            build_counts = wc_words(&src)
+                .map(|b| build_counts.words(b))
+                .user_err("Error in wc_words");
+        }
+        if do_lines {
+            build_counts = wc_lines(&src)
+                .map(|b| build_counts.lines(b))
+                .user_err("Error in wc_lines");
+        }
+        counts = build_counts;
+    }
+    println!("{}", Counts::format(&counts));
+}
+
 /// Convenience function for running wc in idiomatic fashion
 /// (i.e.) errors are printed to user and the program exits.
 pub fn run_wc_lines(src: &str) {
     let wc_res = wc_lines(src).user_err("Error in wc_lines");
-    println!("{}", wc_res);
+    println!("{}", Counts::format(&Counts::null().lines(wc_res)));
 }
 
 pub fn wc_lines(src: &str) -> Result<usize, Error> {
@@ -56,7 +111,7 @@ pub fn wc_lines_file(f_in: &File) -> Result<usize, Error> {
 /// (i.e.) errors are printed to user and the program exits.
 pub fn run_wc_bytes(src: &str) {
     let wc_res = wc_bytes(src).user_err("Error in wc_bytes");
-    println!("{}", wc_res);
+    println!("{} {}", wc_res, &src);
 }
 
 pub fn wc_bytes(src: &str) -> Result<usize, Error> {
@@ -74,7 +129,7 @@ pub fn wc_bytes_file(f_in: &File) -> Result<usize, Error> {
 /// (i.e.) errors are printed to user and the program exits.
 pub fn run_wc_words(src: &str) {
     let wc_res = wc_words(src).user_err("Error in wc_words");
-    println!("{}", wc_res);
+    println!("{}", Counts::format(&Counts::null().words(wc_res)));
 }
 
 pub fn wc_words(src: &str) -> Result<usize, Error> {
@@ -178,21 +233,53 @@ pub fn num_newlines(b_slice: &[u8]) -> usize {
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Hash)]
 pub struct Counts {
-    pub bytes: usize,
-    pub words: usize,
-    pub lines: usize,
+    pub bytes: Option<usize>,
+    pub words: Option<usize>,
+    pub lines: Option<usize>,
 }
 
 impl Counts {
-    fn new(bytes: usize, words: usize, lines: usize) -> Self {
+    const fn new(bytes: usize, words: usize, lines: usize) -> Self {
         Counts {
-            bytes,
-            words,
-            lines,
+            bytes: Some(bytes),
+            words: Some(words),
+            lines: Some(lines),
         }
     }
-    fn empty() -> Self {
+    const fn empty() -> Self {
         Self::new(0, 0, 0)
+    }
+    const fn null() -> Self {
+        Counts {
+            bytes: None,
+            words: None,
+            lines: None,
+        }
+    }
+    const fn bytes(self, bytes: usize) -> Self {
+        Counts {
+            bytes: Some(bytes),
+            ..self
+        }
+    }
+    const fn words(self, words: usize) -> Self {
+        Counts {
+            words: Some(words),
+            ..self
+        }
+    }
+    const fn lines(self, lines: usize) -> Self {
+        Counts {
+            lines: Some(lines),
+            ..self
+        }
+    }
+    //TODO: const
+    fn format(&self) -> String {
+        let b_str = opt_as_empty_str(self.bytes);
+        let w_str = opt_as_empty_str(self.words);
+        let l_str = opt_as_empty_str(self.lines);
+        format!("{} {} {}", l_str, w_str, b_str)
     }
 }
 
@@ -339,7 +426,7 @@ impl From<&[u8]> for FluxMay {
 /// (i.e.) errors are printed to user and the program exits.
 pub fn run_wc_all(src: &str) {
     let wc_res = wc_all(src).user_err("Error in wc_all");
-    println!("{} {} {}", wc_res.lines, wc_res.words, wc_res.bytes);
+    println!("{}", Counts::format(&wc_res));
 }
 
 pub fn wc_all(src: &str) -> Result<Counts, Error> {

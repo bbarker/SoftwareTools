@@ -5,6 +5,8 @@ use std::env;
 use std::fs::File;
 use std::io::{Error, Write};
 
+use seahorse::App;
+
 pub mod bytes_iter;
 pub use bytes_iter::BytesIter;
 
@@ -45,4 +47,13 @@ pub fn cp(src: &str, dst: &str) -> Result<(), Error> {
         Ok(b_slice) => f_out.write_all(&b_slice),
         Err(err) => Err(err),
     })
+}
+
+/// This is a wrapper around the Seahorse `App.run` that emits
+/// a nicer user error message if there are no aguments provided.
+pub fn run_app(app: App, args: Vec<String>, arg_err: &str) {
+    match args.len() {
+        0 => user_exit(&format!("{}: Zero arguments in run_app", arg_err)),
+        _ => app.run(args),
+    }
 }

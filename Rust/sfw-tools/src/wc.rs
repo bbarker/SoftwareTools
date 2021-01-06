@@ -4,7 +4,6 @@ use sfwtools::counting::*;
 use sfwtools::run_app;
 use std::env;
 
-
 fn main() {
     let app_name: String = String::from("wc");
     let mut mod_args = env::args().collect::<Vec<String>>();

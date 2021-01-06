@@ -51,6 +51,18 @@ The following exceptions exist:
   very late in the application logic, and most of the API could be used
   without worrying about it.
 
+### Currently unused
+
+- [im](https://docs.rs/im)
+  Immutable data structures that implement structural sharing can be
+  even more performant than `std`'s mutable structures for large
+  data types, and while Rust makes mutation far safer than most languages,
+  mutation can still result in confusion at times, so in the cases where
+  clarity is more important than performance (or performance doesn't
+  matter much, e.g. one-ops), it may be preferable to use immutable data
+  structures.
+
+
 ## Build
 
 Currently, do generate small builds the following commands

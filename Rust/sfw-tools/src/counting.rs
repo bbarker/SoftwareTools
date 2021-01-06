@@ -51,11 +51,10 @@ pub fn run_wc_seahorse_cmd() -> Command {
 }
 
 pub fn run_wc_seahorse_action(ctxt: &Context) {
-    println!("{:?}", ctxt.args);
     let src = ctxt.args.first().user_err("wc: missing source");
     let do_bytes = ctxt.bool_flag("bytes");
     let do_words = ctxt.bool_flag("words");
-    let do_lines = ctxt.bool_flag("words");
+    let do_lines = ctxt.bool_flag("lines");
     let do_all = do_lines && do_words && do_bytes;
     let do_all = do_all || (!do_lines && !do_words && !do_bytes);
     let counts: Counts;

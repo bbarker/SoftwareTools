@@ -9,6 +9,11 @@ use crate::constants::*;
 use crate::error::*;
 use crate::util::{is_newline, opt_as_empty_str};
 
+#[cfg(feature = "threaded")]
+use rayon::prelude::*;
+
+use crate::par_iter;
+
 pub fn wc_app() -> App {
     App::new("wc")
         .description("wc: line, word, and byte counting")
@@ -211,24 +216,19 @@ impl Semigroup for WordCount {
 impl Monoid for WordCount {}
 
 pub fn word_count(b_slice: &[u8]) -> usize {
-    b_slice
-        .iter()
-        .map(WordCount::from)
-        .fold(Empty::empty(), Semigroup::combine)
-        .count
+        par_iter!(b_slice).map(WordCount::from)
+            .fold(Empty::empty(), Semigroup::combine)
+            .count
 }
 
 pub fn num_newlines(b_slice: &[u8]) -> usize {
-    b_slice.iter().fold(
-        0_usize,
-        |ac, bt| {
-            if is_newline(*bt) {
-                ac + 1
-            } else {
-                ac
-            }
-        },
-    )
+    par_iter!(b_slice).fold(0_usize, |ac, bt| {
+        if is_newline(*bt) {
+            ac + 1
+        } else {
+            ac
+        }
+    })
 }
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Hash)]

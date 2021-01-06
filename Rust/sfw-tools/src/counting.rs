@@ -11,7 +11,6 @@ use crate::util::{is_newline, opt_as_empty_str};
 
 pub fn wc_app() -> App {
     App::new("wc")
-        .description("wc: line, word, and byte counting")
         .author("Brandon Elam Barker")
         .action(run_wc_seahorse_action)
         .command(run_wc_seahorse_cmd())
@@ -52,6 +51,7 @@ pub fn run_wc_seahorse_cmd() -> Command {
 }
 
 pub fn run_wc_seahorse_action(ctxt: &Context) {
+    println!("{:?}", ctxt.args);
     let src = ctxt.args.first().user_err("wc: missing source");
     let do_bytes = ctxt.bool_flag("bytes");
     let do_words = ctxt.bool_flag("words");

@@ -1,6 +1,7 @@
 #![deny(unused_must_use)]
 
-use sfwtools::{get_args, run_cp, user_exit, SfwRes};
+use sfwtools::copying::run_cp;
+use sfwtools::{get_args, user_exit, SfwRes};
 use std::ffi::OsStr;
 use std::path::Path;
 

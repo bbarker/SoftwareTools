@@ -2,8 +2,7 @@
 #![feature(try_trait)]
 
 use std::env;
-use std::fs::File;
-use std::io::{Error, Write};
+use std::io::Error;
 
 use seahorse::App;
 
@@ -21,6 +20,9 @@ pub use util::*;
 
 // Following are re-exports for specific functionality //
 
+pub mod copying;
+pub use copying::*;
+
 pub mod counting;
 pub use counting::*;
 
@@ -29,24 +31,6 @@ pub fn get_args() -> Result<(String, Vec<String>), Error> {
     let cmd = args_in.next().sfw_err("Impossible: no first arg!")?;
     let args_out: Vec<String> = args_in.collect::<Vec<String>>();
     Ok((cmd, args_out))
-}
-
-/// Convenience function for running cp in idiomatic fashion
-/// (i.e.) errors are printed to user and the program exits.
-pub fn run_cp(src: &str, dst: &str) {
-    cp(src, dst).user_err("Error in cp");
-}
-
-pub fn cp(src: &str, dst: &str) -> Result<(), Error> {
-    let f_in = File::open(&src).sfw_err("Couldn't open source")?;
-    let mut f_in_iter = BytesIter::new(f_in, DEFAULT_BUF_SIZE);
-    let mut f_out = File::create(&dst)
-        .sfw_err(&*format!("Couldn't open destination: {}", &dst))?;
-
-    f_in_iter.try_for_each(|b_slice_res| match b_slice_res {
-        Ok(b_slice) => f_out.write_all(&b_slice),
-        Err(err) => Err(err),
-    })
 }
 
 /// This is a wrapper around the Seahorse `App.run` that emits

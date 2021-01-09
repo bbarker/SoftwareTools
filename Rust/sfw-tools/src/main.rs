@@ -1,28 +1,17 @@
 #![deny(unused_must_use)]
 
-use sfwtools::copying::run_cp;
-use sfwtools::{get_args, user_exit, SfwRes};
-use std::ffi::OsStr;
-use std::path::Path;
+use sfwtools::copying::run_cp_seahorse_cmd;
+use sfwtools::counting::run_wc_seahorse_cmd;
+use sfwtools::run_app;
+use std::env;
+
+use seahorse::App;
 
 fn main() {
-    let (cmd, args) = get_args().user_err("Argument error");
-    let cmd_path = Path::new(&cmd);
-
-    match cmd_path.file_name().and_then(OsStr::to_str) {
-        Some("cp") => {
-            let src = args.get(0).user_err("cp: missing source");
-            let dst = args.get(1).user_err("cp: missing destination");
-            run_cp(&src, &dst);
-        }
-        Some(u) => user_exit(&*format!("Unknown sfwtools command: {}", u)),
-        None => user_exit("No command passed to sfwtools, exiting."),
-    }
-
-    // let src = args.next().expect("cp: missing source");
-    // let dst = args.next().expect("cp: missing destination");
-    // match cp(src, dst) {
-    //     Ok(_) => (),
-    //     Err(err) => panic!("Failure in cp: {}", err),
-    // }
+    let app_name: String = String::from("sfwtools");
+    let app = App::new(app_name.clone())
+        .author("Brandon Elam Barker")
+        .command(run_cp_seahorse_cmd())
+        .command(run_wc_seahorse_cmd());
+    run_app(app, env::args().collect(), &app_name)
 }

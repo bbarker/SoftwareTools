@@ -1,12 +1,15 @@
 [package]
 name = "sfw-tools"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Brandon Barker <brandon.barker@gmail.com>"]
 edition = "2018"
 license = "MPL-2.0"
 # license-file = "LICENSE.txt"
 description  = "Functions and programs from the book Software Tools"
 categories = ["command-line-utilities"]
+homepage = "https://github.com/bbarker/SoftwareTools"
+repository = "https://github.com/bbarker/SoftwareTools"
+documentation = "https://docs.rs/sfw-tools"
 
 [profile.release]
 lto = true

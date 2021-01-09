@@ -14,7 +14,7 @@ codegen-units = 1
 
 [lib]
 name = "sfwtools"
-path = "src/sfwtools.rs"
+path = "src/lib.rs"
 
 [[bin]]
 name = "sfwtools"

@@ -27,6 +27,11 @@
 //! out in Software Tools, pp 21, *"The best programs are designed in
 //! terms of loosely coupled functions that each does a simple task."*
 //!
+//! ## Currently Implemented Tools
+//! - [x] `cp`
+//! - [x] `wc`
+//! - [ ] `detab`
+//!
 //! ## Dependencies
 //!
 //! Since the goal is to make the software both as self-contained and

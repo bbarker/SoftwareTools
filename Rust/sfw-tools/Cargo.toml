@@ -3,7 +3,9 @@ name = "sfw-tools"
 version = "0.1.0"
 authors = ["Brandon Barker <brandon.barker@gmail.com>"]
 edition = "2018"
-license-file = "LICENSE.txt"
+license = "MPL-2.0"
+# license-file = "LICENSE.txt"
+description  = "Functions and programs from the book Software Tools"
 categories = ["command-line-utilities"]
 
 [profile.release]

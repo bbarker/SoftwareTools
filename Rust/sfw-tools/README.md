@@ -29,6 +29,11 @@ complexity, verbosity, and the risk of errors. Primary examples are
 out in Software Tools, pp 21, *"The best programs are designed in
 terms of loosely coupled functions that each does a simple task."*
 
+### Currently Implemented Tools
+- [x] `cp`
+- [x] `wc`
+- [ ] `detab`
+
 ### Dependencies
 
 Since the goal is to make the software both as self-contained and
@@ -153,3 +158,5 @@ cd Rust/sfw-tools && cargo readme > README.md && git add README.md
 ```
 As can be seen this also gnerates the README from doc comments in `lib.rs`.
 
+
+License: MPL-2.0

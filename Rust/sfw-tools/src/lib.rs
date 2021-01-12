@@ -185,6 +185,9 @@ pub use copying::*;
 pub mod counting;
 pub use counting::*;
 
+pub mod tabs;
+pub use tabs::*;
+
 pub fn get_args() -> Result<(String, Vec<String>), Error> {
     let mut args_in = env::args();
     let cmd = args_in.next().sfw_err("Impossible: no first arg!")?;

@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use std::fs::File;
-use std::io::{Error, Write};
+use std::io::{Error, Read, Write};
 
 // use seahorse::{App, Command, Context};
 
@@ -33,9 +33,23 @@ pub fn tab_pos_to_space(pos: usize, tab_config: &TabConf) -> usize {
     }
 }
 
+fn detab_go<'a, I, R, W>(
+    f_out: &W,
+    bytes_iter: BytesIter<R>,
+    buf_iter: I,
+    tab_pos_last: usize,
+) where
+    I: Iterator<Item = &'a u8>,
+    R: Read,
+    W: Write,
+{
+    todo!();
+    ();
+}
+
 /* //Pseudo code
 
-go(&f_out, &bytes_iter, mut buf_iter, tab_pos_last) {
+go(f_out: &File, bytes_iter: BytesIter, buf_iter: mut Iterator<u8>, tab_pos_last: usize) {
 
   f_out.write(buf_iter.take_until(|c| is_tab_or_newline(c)));
 

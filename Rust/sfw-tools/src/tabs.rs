@@ -3,6 +3,7 @@ use std::fs::File;
 use std::io::{Error, Read, Write};
 
 // use seahorse::{App, Command, Context};
+use tailcall::tailcall;
 
 use crate::bytes_iter::BytesIter;
 use crate::constants::*;
@@ -33,18 +34,36 @@ pub fn tab_pos_to_space(pos: usize, tab_config: &TabConf) -> usize {
     }
 }
 
+
+#[tailcall]
 fn detab_go<'a, I, R, W>(
     f_out: &W,
     bytes_iter: BytesIter<R>,
     buf_iter: I,
     tab_pos_last: usize,
-) where
+) -> Result<(), Error> where
     I: Iterator<Item = &'a u8>,
     R: Read,
     W: Write,
 {
     todo!();
-    ();
+
+    match buf_iter.next() {
+        Some(byt) => {
+            todo!();
+            detab_go(f_out, bytes_iter, buf_iter, /*&tab_pos_new*/ todo!())
+        },
+        None => {
+            match bytes_iter.next() {
+                Some(buf_new) => {
+                    let buf_test : Vec<u8> = buf_new?;
+                    let buf_iter = buf_test.iter(); //shadow
+                    detab_go(f_out, bytes_iter, buf_iter, /*&tab_pos_new*/ todo!())
+                },
+                None => todo!(),
+            }
+        }
+    }
 }
 
 /* //Pseudo code

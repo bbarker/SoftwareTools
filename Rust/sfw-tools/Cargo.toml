@@ -34,6 +34,7 @@ name = "wc"
 path = "src/wc.rs"
 
 [dependencies]
+# byteorder = "1.4.2"
 fp-core = "0.1.9"
 seahorse = "1.1.1"
 # tailcall = "0.1.4"

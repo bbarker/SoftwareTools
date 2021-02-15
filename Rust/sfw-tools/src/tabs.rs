@@ -3,11 +3,13 @@ use std::fs::File;
 use std::io::{Error, Read, Write};
 
 // use seahorse::{App, Command, Context};
+// use byteorder::WriteBytesExt;
 use tailcall::tailcall_res;
 
 use crate::bytes_iter::BytesIter;
 use crate::constants::*;
 use crate::error::*;
+use crate::util::{is_newline, is_tab_or_newline, write_u8};
 
 pub fn detab(src: &str, dst: &str) -> Result<(), Error> {
     let f_in = File::open(&src).sfw_err("Couldn't open source")?;
@@ -34,13 +36,14 @@ pub fn tab_pos_to_space(pos: usize, tab_config: &TabConf) -> usize {
     }
 }
 
-// buf_iter: expected type parameter `I`, found struct `std::slice::Iter<'_, u8>`
+// TODO: in outer function use, a BufWriter:
+//https://stackoverflow.com/a/47184074/3096687
 
-// #[tailcall_res]
+#[tailcall_res]
 fn detab_go<'a, I, R, W>(
-    f_out: &W,
-    bytes_iter: BytesIter<R>,
-    buf_iter: I,
+    f_out: &mut W,
+    mut bytes_iter: BytesIter<R>,
+    mut buf_iter: I,
     tab_pos_last: usize,
 ) -> Result<(), Error>
 where
@@ -48,12 +51,15 @@ where
     R: Read,
     W: Write,
 {
-    todo!();
-
     match buf_iter.next() {
-        Some(byt) => {
-            todo!();
-            detab_go(f_out, bytes_iter, buf_iter, /*&tab_pos_new*/ todo!())
+        Some(byte) => {
+            if !is_tab_or_newline(*byte) {
+                write_u8(f_out, *byte)?;
+            }
+            detab_go(
+                f_out, bytes_iter, buf_iter,
+                /*&tab_pos_new*/ /*todo!() */ 1,
+            )
         }
         None => {
             match bytes_iter.next() {
@@ -61,13 +67,11 @@ where
                     let buf_test: Vec<u8> = buf_new?;
                     let buf_iter = buf_test.iter(); //shadow
                     detab_go(
-                        f_out,
-                        bytes_iter,
-                        buf_iter,
-                        /*&tab_pos_new*/ todo!(),
+                        f_out, bytes_iter, buf_iter,
+                        /*&tab_pos_new*/ /*todo!()*/ 1,
                     )
                 }
-                None => todo!(),
+                None => Ok(()), /* Finished */
             }
         }
     }

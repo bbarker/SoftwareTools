@@ -59,6 +59,10 @@
 //!
 //! ### Currently unused
 //!
+//! - [byteorder](docs.rs/byteorder) Library for reading/writing numbers
+//!   in big-endian and little-endian. This is a somewhat low-level library,
+//!   but as this is an IO-heavy library of tools, it may make sense to rely
+//!   on it.
 //! - [im](https://docs.rs/im)
 //!   Immutable data structures that implement structural sharing can be
 //!   even more performant than `std`'s mutable structures for large

@@ -73,23 +73,6 @@ The following exceptions exist:
 
 ### Build
 
-Currently, do generate small builds the following commands
-are required.
-
-1. (only once per environment) Make source code for the standard library available:
-
-```plain
-rustup component add rust-src --toolchain nightly
-```
-
-2.
-
-```plain
-cargo +nightly build -Z build-std --target x86_64-unknown-linux-gnu --release
-```
-
-3. (optional) `strip` binary - see links in notes
-
 ### Misc Notes
 
 #### Using todo!() to
@@ -113,10 +96,35 @@ Most beneficial is that `rustc` will warn you if you a `todo!()` is
 left in your code, since it would result in a panic if that execution
 path were to occur.
 
+#### Rust on nix
+
+```plain
+nix-shell -p rustup cargo
+
+
+```
 
 #### Optimizing for size
 
 * https://github.com/johnthagen/min-sized-rust
+
+Currently, to generate small builds the following commands
+are required.
+
+1. (only once per environment) Make source code for the standard library available:
+
+```plain
+rustup component add rust-src --toolchain nightly
+```
+
+2.
+
+```plain
+cargo +nightly build -Z build-std --target x86_64-unknown-linux-gnu --release
+```
+
+3. (optional) `strip` binary - see links in notes
+
 
 ### Project administration
 

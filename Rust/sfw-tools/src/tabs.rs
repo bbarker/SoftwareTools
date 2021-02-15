@@ -39,7 +39,7 @@ pub fn tab_pos_to_space(pos: usize, tab_config: &TabConf) -> usize {
 // TODO: in outer function use, a BufWriter:
 //https://stackoverflow.com/a/47184074/3096687
 
-#[tailcall_res]
+// #[tailcall_res]
 fn detab_go<'a, I, R, W>(
     f_out: &mut W,
     mut bytes_iter: BytesIter<R>,

@@ -102,3 +102,44 @@ go(f_out: &File, bytes_iter: BytesIter, buf_iter: mut Iterator<u8>, tab_pos_last
 
 }
 */
+
+fn detab_go_exp<'a, I, R, W>(
+    f_out: &mut W,
+    mut bytes_iter: BytesIter<R>,
+    mut buf_iter: I,
+    tab_pos_last: usize,
+) -> Result<(), Error>
+where
+    I: Iterator<Item = &'a u8>,
+    R: Read,
+    W: Write,
+{
+    tailcall::trampoline::run_res(
+        #[inline(always)]
+        |(f_out, mut bytes_iter, mut buf_iter, tab_pos_last)| {
+            Ok(tailcall::trampoline::Finish({
+                match buf_iter.next() {
+                    Some(byte) => {
+                        if !is_tab_or_newline(*byte) {
+                            write_u8(f_out, *byte)?;
+                        }
+                        return Ok(tailcall::trampoline::Recurse((
+                            f_out, bytes_iter, buf_iter, 1,
+                        )));
+                    }
+                    None => match bytes_iter.next() {
+                        Some(buf_new) => {
+                            let buf_test: Vec<u8> = buf_new?;
+                            let buf_iter = buf_test.iter();
+                            return Ok(tailcall::trampoline::Recurse((
+                                f_out, bytes_iter, buf_iter, 1,
+                            )));
+                        }
+                        None => Ok(()),
+                    },
+                }
+            }))
+        },
+        (f_out, bytes_iter, buf_iter, tab_pos_last),
+    )
+}

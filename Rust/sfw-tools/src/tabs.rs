@@ -39,15 +39,15 @@ pub fn tab_pos_to_space(pos: usize, tab_config: &TabConf) -> usize {
 // TODO: in outer function use, a BufWriter:
 //https://stackoverflow.com/a/47184074/3096687
 
-// #[tailcall_res]
-fn detab_go<'a, I, R, W>(
+#[tailcall_res]
+fn detab_go<'a, R, W>(
     f_out: &mut W,
     mut bytes_iter: BytesIter<R>,
-    mut buf_iter: I,
+    mut buf_iter: std::slice::Iter<'_, u8>, // I,
     tab_pos_last: usize,
 ) -> Result<(), Error>
 where
-    I: Iterator<Item = &'a u8>,
+    // I: Iterator<Item = &'a u8>,
     R: Read,
     W: Write,
 {
@@ -103,6 +103,7 @@ go(f_out: &File, bytes_iter: BytesIter, buf_iter: mut Iterator<u8>, tab_pos_last
 }
 */
 
+/*
 fn detab_go_exp<'a, I, R, W>(
     f_out: &mut W,
     mut bytes_iter: BytesIter<R>,
@@ -143,3 +144,4 @@ where
         (f_out, bytes_iter, buf_iter, tab_pos_last),
     )
 }
+*/

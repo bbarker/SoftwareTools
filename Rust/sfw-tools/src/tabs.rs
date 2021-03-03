@@ -43,11 +43,10 @@ pub fn tab_pos_to_space(pos: usize, tab_config: &TabConf) -> usize {
 fn detab_go<'a, R, W>(
     f_out: &mut W,
     mut bytes_iter: BytesIter<R>,
-    mut buf_iter: std::vec::IntoIter<u8>, // I,
+    mut buf_iter: std::vec::IntoIter<u8>,
     tab_pos_last: usize,
 ) -> Result<(), Error>
 where
-    // I: Iterator<Item = &'a u8>,
     R: Read,
     W: Write,
 {
@@ -58,135 +57,17 @@ where
             }
             detab_go(
                 f_out, bytes_iter, buf_iter,
-                /*&tab_pos_new*/ /*todo!() */ 1,
+                /*&tab_pos_new*/ todo!(),
             )
         }
         None => {
             match bytes_iter.next() {
                 Some(buf_new) => {
                     let buf_iter = buf_new?.into_iter(); //shadow
-                    detab_go(
-                        f_out, bytes_iter, buf_iter,
-                        /*&tab_pos_new*/ /*todo!()*/ 1,
-                    )
+                    detab_go(f_out, bytes_iter, buf_iter, tab_pos_last)
                 }
                 None => Ok(()), /* Finished */
             }
         }
     }
 }
-
-/* //Pseudo code
-
-go(f_out: &File, bytes_iter: BytesIter, buf_iter: mut Iterator<u8>, tab_pos_last: usize) {
-
-  f_out.write(buf_iter.take_until(|c| is_tab_or_newline(c)));
-
-  //TODO: analyze next character for tab or newline
-  let tab_or_nl = ...
-  if is_newline(tab_or_nl) {
-
-  }
-  else {
-
-  };
-
-
-  if buf.is_empty() {
-    let buf_new = bytes_iter.read();
-    let buf_iter = buf_new.iter(); //shadow
-    go(&f_out, &bytes_iter, buf_iter,  &tab_pos_new)
-  }
-  else { go(&f_out, &bytes_iter, &buf_iter, &tab_pos_new) }
-
-}
-*/
-
-
-
-
-
-fn detab_go_exp<'a, R, W>(
-    f_out: &mut W,
-    bytes_iter: BytesIter<R>,
-    buf_iter: std::vec::IntoIter<u8>,
-    tab_pos_last: usize,
-) -> Result<(), Error>
-where
-    R: Read,
-    W: Write,
-{
-    tailcall::trampoline::run_res(
-        #[inline(always)]
-        |(f_out, mut bytes_iter, mut buf_iter, tab_pos_last)| {
-            Ok(tailcall::trampoline::Finish({
-                match buf_iter.next() {
-                    Some(byte) => {
-                        if !is_tab_or_newline(byte) {
-                            write_u8(f_out, byte)?;
-                        }
-                        return Ok(tailcall::trampoline::Recurse((
-                            f_out, bytes_iter, buf_iter, 1,
-                        )));
-                    }
-                    None => match bytes_iter.next() {
-                        Some(buf_new) => {
-                            let buf_iter = buf_new?.into_iter();
-                            return Ok(tailcall::trampoline::Recurse((
-                                f_out, bytes_iter, buf_iter, 1,
-                            )));
-                        }
-                        None => Ok(()),
-                    },
-                }
-            }))
-        },
-        (f_out, bytes_iter, buf_iter, tab_pos_last),
-    )
-}
-
-
-
-
-/*
-fn detab_go_exp<'a, I, R, W>(
-    f_out: &mut W,
-    mut bytes_iter: BytesIter<R>,
-    mut buf_iter: I,
-    tab_pos_last: usize,
-) -> Result<(), Error>
-where
-    I: Iterator<Item = &'a u8>,
-    R: Read,
-    W: Write,
-{
-    tailcall::trampoline::run_res(
-        #[inline(always)]
-        |(f_out, mut bytes_iter, mut buf_iter, tab_pos_last)| {
-            Ok(tailcall::trampoline::Finish({
-                match buf_iter.next() {
-                    Some(byte) => {
-                        if !is_tab_or_newline(*byte) {
-                            write_u8(f_out, *byte)?;
-                        }
-                        return Ok(tailcall::trampoline::Recurse((
-                            f_out, bytes_iter, buf_iter, 1,
-                        )));
-                    }
-                    None => match bytes_iter.next() {
-                        Some(buf_new) => {
-                            let buf_test: Vec<u8> = buf_new?;
-                            let buf_iter = buf_test.iter();
-                            return Ok(tailcall::trampoline::Recurse((
-                                f_out, bytes_iter, buf_iter, 1,
-                            )));
-                        }
-                        None => Ok(()),
-                    },
-                }
-            }))
-        },
-        (f_out, bytes_iter, buf_iter, tab_pos_last),
-    )
-}
-*/

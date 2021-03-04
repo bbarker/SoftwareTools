@@ -21,6 +21,6 @@ pub fn opt_as_empty_str<T: ToString>(str_opt: Option<T>) -> String {
 
 // Based on write_u8 from byteorder
 #[inline]
-pub fn write_u8(writer: &mut Write, n: u8) -> Result<(), Error> {
+pub fn write_u8<W: Write>(writer: &mut W, n: u8) -> Result<(), Error> {
     writer.write_all(&[n])
 }

@@ -4,7 +4,7 @@ use std::io::{Error, Read, Write};
 
 // use seahorse::{App, Command, Context};
 // use byteorder::WriteBytesExt;
-use tailcall::tailcall_res;
+use tailcall::tailcall;
 
 use crate::bytes_iter::BytesIter;
 use crate::constants::*;
@@ -48,7 +48,7 @@ pub fn tab_pos_to_space(tab_config: &TabConf, pos: usize) -> usize {
 
 const SPACE_ARRAY: [u8; 256] = [b' '; 256];
 
-#[tailcall_res]
+#[tailcall]
 fn detab_go<'a, R, W>(
     tab_cnf: &TabConf,
     f_out: &mut W,

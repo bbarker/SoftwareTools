@@ -10,6 +10,12 @@ use crate::constants::*;
 use crate::error::*;
 use crate::util::write_u8;
 
+#[derive(Clone, Eq, PartialEq, Debug)]
+pub enum TabConf {
+    TabConstant(usize),
+    TabMap(usize, HashMap<usize, usize>),
+}
+
 pub fn detab_app() -> App {
     App::new("detab")
         .author("Brandon Elam Barker")
@@ -27,7 +33,7 @@ pub fn run_detab_seahorse_cmd() -> Command {
 }
 
 pub fn run_detab_seahorse_action(ctxt: &Context) {
-    let mut args = ctxt.args.iter();
+    let args = &mut ctxt.args.iter();
     let src = args.next().user_err("detab: missing source");
     let f_out: Box<dyn Write> = match args.next() {
         Some(dst) => Box::new(
@@ -47,17 +53,14 @@ pub fn run_detab(src: &str, dst: Box<dyn Write>) {
 
 pub fn detab<W: Write>(src: &str, mut f_out: W) -> Result<(), Error> {
     let f_in = File::open(&src).sfw_err("Couldn't open source")?;
-    let mut f_in_iter = BytesIter::new(f_in, DEFAULT_BUF_SIZE);
-
-    f_in_iter.try_for_each(|b_slice_res| match b_slice_res {
-        Ok(b_slice) => f_out.write_all(&b_slice),
-        Err(err) => Err(err),
-    })
-}
-
-pub enum TabConf {
-    TabConstant(usize),
-    TabMap(usize, HashMap<usize, usize>),
+    let f_in_iter = BytesIter::new(f_in, DEFAULT_BUF_SIZE);
+    detab_go(
+        &TabConf::TabConstant(2),
+        &mut f_out,
+        f_in_iter,
+        vec![].into_iter(),
+        0,
+    )
 }
 
 // TODO: const
@@ -86,7 +89,7 @@ fn detab_go<'a, R, W>(
     f_out: &mut W,
     mut bytes_iter: BytesIter<R>,
     mut buf_iter: std::vec::IntoIter<u8>,
-    tab_pos_last: usize,
+    tab_pos: usize,
 ) -> Result<(), Error>
 where
     R: Read,
@@ -96,10 +99,9 @@ where
         Some(byte) => {
             let tab_pos_new = match byte {
                 b'\t' => {
-                    let tab_pos_new = tab_pos_last + 1;
-                    let spc_count = tab_pos_to_space(tab_cnf, tab_pos_new);
+                    let spc_count = tab_pos_to_space(tab_cnf, tab_pos);
                     f_out.write_all(&SPACE_ARRAY[0..spc_count])?;
-                    tab_pos_new
+                    tab_pos + 1
                 }
                 b'\n' => {
                     write_u8(f_out, byte)?;
@@ -107,7 +109,7 @@ where
                 }
                 _ => {
                     write_u8(f_out, byte)?;
-                    tab_pos_last
+                    tab_pos
                 }
             };
             detab_go(tab_cnf, f_out, bytes_iter, buf_iter, tab_pos_new)
@@ -116,7 +118,7 @@ where
             match bytes_iter.next() {
                 Some(buf_new) => {
                     let buf_iter = buf_new?.into_iter(); //shadow
-                    detab_go(tab_cnf, f_out, bytes_iter, buf_iter, tab_pos_last)
+                    detab_go(tab_cnf, f_out, bytes_iter, buf_iter, tab_pos)
                 }
                 None => Ok(()), /* Finished */
             }

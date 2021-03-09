@@ -41,8 +41,8 @@ path = "src/detab.rs"
 # byteorder = "1.4.2"
 fp-core = "0.1.9"
 seahorse = "1.1.1"
-# tailcall = "0.1.4"
-tailcall = { git = "https://github.com/alecdotninja/tailcall.git", branch = "rewrite-as-loop"}
+tailcall = "0.1.6"
+# tailcall = { git = "https://github.com/alecdotninja/tailcall.git", branch = "rewrite-as-loop"}
 # im = "15.0.0"
 
 [dev-dependencies.cargo-husky]

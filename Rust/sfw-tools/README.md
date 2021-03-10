@@ -32,7 +32,7 @@ terms of loosely coupled functions that each does a simple task."*
 ### Currently Implemented Tools
 - [x] `cp`
 - [x] `wc`
-- [ ] `detab`
+- [x] `detab`
 
 ### Dependencies
 
@@ -48,6 +48,11 @@ The following exceptions exist:
   traits that are commonly found to be helpful abstracts in functional languages.
   We will use a few of these where it is particularly illustrative or sensible,
   but will stick with idiomatic Rust where that is obviously simpler.
+- [tailcall](https://docs.rs/tailcall)
+  This is a macro that enables tailcall elimination for functions that are
+  tail recursive. In other words, instead of writing loops, we can sometimes
+  just write a function that calls itself. Without this macro, such functions
+  would eventually cause the stack to blow up.
 - [seahorse](https://docs.rs/seahorse)
   Seahorse is a minimal argument parser. Judging by some results
   returned by Google, [clap](https://clap.rs) is far more popular, but

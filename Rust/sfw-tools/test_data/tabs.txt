@@ -1,0 +1,5 @@
+Pipe to "od -An -vtu1" to check ascii codes
+
+foo bar         baz
+zip	zog
+	end of it

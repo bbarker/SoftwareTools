@@ -30,7 +30,7 @@
 //! ## Currently Implemented Tools
 //! - [x] `cp`
 //! - [x] `wc`
-//! - [ ] `detab`
+//! - [x] `detab`
 //!
 //! ## Dependencies
 //!
@@ -46,6 +46,11 @@
 //!   traits that are commonly found to be helpful abstracts in functional languages.
 //!   We will use a few of these where it is particularly illustrative or sensible,
 //!   but will stick with idiomatic Rust where that is obviously simpler.
+//! - [tailcall](https://docs.rs/tailcall)
+//!   This is a macro that enables tailcall elimination for functions that are
+//!   tail recursive. In other words, instead of writing loops, we can sometimes
+//!   just write a function that calls itself. Without this macro, such functions
+//!   would eventually cause the stack to blow up.
 //! - [seahorse](https://docs.rs/seahorse)
 //!   Seahorse is a minimal argument parser. Judging by some results
 //!   returned by Google, [clap](https://clap.rs) is far more popular, but
@@ -59,6 +64,10 @@
 //!
 //! ### Currently unused
 //!
+//! - [byteorder](docs.rs/byteorder) Library for reading/writing numbers
+//!   in big-endian and little-endian. This is a somewhat low-level library,
+//!   but as this is an IO-heavy library of tools, it may make sense to rely
+//!   on it.
 //! - [im](https://docs.rs/im)
 //!   Immutable data structures that implement structural sharing can be
 //!   even more performant than `std`'s mutable structures for large
@@ -70,23 +79,6 @@
 //!
 //!
 //! ## Build
-//!
-//! Currently, do generate small builds the following commands
-//! are required.
-//!
-//! 1. (only once per environment) Make source code for the standard library available:
-//!
-//! ```plain
-//! rustup component add rust-src --toolchain nightly
-//! ```
-//!
-//! 2.
-//!
-//! ```plain
-//! cargo +nightly build -Z build-std --target x86_64-unknown-linux-gnu --release
-//! ```
-//!
-//! 3. (optional) `strip` binary - see links in notes
 //!
 //! ## Misc Notes
 //!
@@ -111,10 +103,36 @@
 //! left in your code, since it would result in a panic if that execution
 //! path were to occur.
 //!
+//! ### Rust on nix
+//!
+//! ```plain
+//! nix-shell -p rustup cargo
+//!
+//!
+//! ```
 //!
 //! ### Optimizing for size
 //!
 //! * https://github.com/johnthagen/min-sized-rust
+//!
+//! Currently, to generate small builds the following commands
+//! are required.
+//!
+//! 1. (only once per environment) Make source code for the standard library available:
+//!
+//! ```plain
+//! rustup component add rust-src --toolchain nightly
+//! ```
+//!
+//! 2.
+//!
+//! ```plain
+//! cargo +nightly build -Z build-std --target x86_64-unknown-linux-gnu --release
+//! ```
+//!
+//! 3. (optional) `strip` binary - see links in notes
+//!
+
 //!
 //! ## Project administration
 //!

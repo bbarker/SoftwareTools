@@ -18,6 +18,9 @@
 //! For a related project that also follows Software Tools in Rust, and
 //! may serve as an interesting comparison, see
 //! [Sweater](https://github.com/rjbs/Sweater).
+//! A more feature-rich project is [uutils coreutils](https://github.com/uutils/coreutils),
+//! which as the name suggests, is a Rust implementation analogous to
+//! GNU Coreutils.
 //!
 //! ## Functional facilities
 //!

@@ -1,5 +1,0 @@
-[toolchain]
-channel = "nightly-2020-12-25"
-components = [ "rustfmt", "rust-std", "clippy" ]
-targets = [ "wasm32-unknown-unknown", "x86_64-unknown-linux-gnu" ]
-

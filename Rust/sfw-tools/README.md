@@ -14,7 +14,7 @@ in three ways:
  3. As well designed code that can be copied as repurposed when necessary.
 
 A fourth avenue may be explored, which is to adopt the
-[nushell](https://github.com/rjbs/Sweater) approach to transfering
+[nushell](https://github.com/rjbs/Sweater) approach to transferring
 tabular data between commands.
 
 For a related project that also follows Software Tools in Rust, and
@@ -46,11 +46,13 @@ The following exceptions exist:
 - [fp-core](https://docs.rs/fp-core)
   This is what one would typically find as part the standard library
   in a functional language, so we have included it here. Though Rust is functional
-  in a sense — it has lamda functions (i.e. Rust closures) and the stand library
+  in a sense — it has lambda functions (i.e. Rust closures) and the stand library
   has many higher-order functions (HOFs) — its standard library doesn't include
   traits that are commonly found to be helpful abstracts in functional languages.
   We will use a few of these where it is particularly illustrative or sensible,
   but will stick with idiomatic Rust where that is obviously simpler.
+  An interesting note is that filters are the subject of chapter 2 and much of
+  the rest of the book, which are just a particular class of HOFs.
 - [tailcall](https://docs.rs/tailcall)
   This is a macro that enables tailcall elimination for functions that are
   tail recursive. In other words, instead of writing loops, we can sometimes
@@ -176,7 +178,7 @@ done
 
 cd Rust/sfw-tools && cargo readme > README.md && git add README.md
 ```
-As can be seen this also gnerates the README from doc comments in `lib.rs`.
+As can be seen this also generates the README from doc comments in `lib.rs`.
 
 
 License: MPL-2.0

@@ -125,3 +125,100 @@ where
         }
     }
 }
+
+const ENTAB_USAGE: &str = "entab [SOURCE_FILE] [DEST_FILE]";
+
+pub fn run_entab_seahorse_cmd() -> Command {
+    Command::new("entab")
+        .description(
+            "entab: replace spaces with tabs in a file; output to STDOUT",
+        )
+        .usage(ENTAB_USAGE)
+        .action(run_entab_seahorse_action)
+}
+
+pub fn run_entab_seahorse_action(ctxt: &Context) {
+    let args = &mut ctxt.args.iter();
+    let src = args.next().user_err("entab: missing source");
+    let f_out: Box<dyn Write> = match args.next() {
+        Some(dst) => Box::new(
+            File::create(&dst)
+                .user_err(&*format!("Couldn't open destination: {}", &dst)),
+        ),
+        None => Box::new(std::io::stdout()),
+    };
+    run_entab(&src, f_out);
+}
+
+/// Convenience function for running entab in idiomatic fashion
+/// (i.e.) errors are printed to user and the program exits.
+pub fn run_entab(src: &str, dst: Box<dyn Write>) {
+    entab(src, dst).user_err("Error in entab");
+}
+
+pub fn entab<W: Write>(src: &str, mut f_out: W) -> Result<(), Error> {
+    let f_in = File::open(&src).sfw_err("Couldn't open source")?;
+    let f_in_iter = BytesIter::new(f_in, DEFAULT_BUF_SIZE);
+    entab_go(
+        &TabConf::TabConstant(2),
+        &mut f_out,
+        f_in_iter,
+        vec![].into_iter(),
+        0,
+        0,
+    )
+}
+
+#[tailcall]
+fn entab_go<'a, R, W>(
+    tab_cnf: &TabConf,
+    f_out: &mut W,
+    mut bytes_iter: BytesIter<R>,
+    mut buf_iter: std::vec::IntoIter<u8>,
+    tab_pos: usize,
+    spc_count: usize,
+) -> Result<(), Error>
+where
+    R: Read,
+    W: Write,
+{
+    match buf_iter.next() {
+        Some(byte) => {
+            let (tab_pos, spc_count) = match byte {
+                b' ' => (tab_pos + 1, spc_count + 1),
+                b'\n' => (0, 0),
+                b'\t' => (tab_pos + 1, spc_count),
+                _ => (tab_pos, spc_count),
+            };
+            let spaces_for_tab = tab_pos_to_space(tab_cnf, tab_pos);
+            let (tab_pos, spc_count) = if spc_count == spaces_for_tab {
+                write_u8(f_out, b'\t')?;
+                (tab_pos + 1, 0)
+            } else {
+                match byte {
+                    b' ' => (tab_pos, spc_count),
+                    _ => {
+                        f_out.write_all(
+                            &(0..spc_count).map(|_| b' ').collect::<Vec<u8>>(),
+                        )?;
+                        write_u8(f_out, byte)?;
+                        (tab_pos, 0)
+                    }
+                }
+            };
+            entab_go(tab_cnf, f_out, bytes_iter, buf_iter, tab_pos, spc_count)
+        }
+        None => {
+            match bytes_iter.next() {
+                Some(buf_new) => {
+                    let buf_iter = buf_new?.into_iter(); //shadow
+                    entab_go(
+                        tab_cnf, f_out, bytes_iter, buf_iter, tab_pos,
+                        spc_count,
+                    )
+                }
+                None => Ok(()), /* Finished */
+            }
+        }
+    }
+}

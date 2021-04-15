@@ -37,6 +37,10 @@ path = "src/wc.rs"
 name = "detab"
 path = "src/detab.rs"
 
+[[bin]]
+name = "entab"
+path = "src/entab.rs"
+
 [dependencies]
 # byteorder = "1.4.2"
 fp-core = "0.1.9"

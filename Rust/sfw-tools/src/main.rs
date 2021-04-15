@@ -3,7 +3,7 @@
 use sfwtools::copying::run_cp_seahorse_cmd;
 use sfwtools::counting::run_wc_seahorse_cmd;
 use sfwtools::run_app;
-use sfwtools::tabs::run_detab_seahorse_cmd;
+use sfwtools::tabs::{run_detab_seahorse_cmd, run_entab_seahorse_cmd};
 use std::env;
 
 use seahorse::App;
@@ -14,6 +14,7 @@ fn main() {
         .author("Brandon Elam Barker")
         .command(run_cp_seahorse_cmd())
         .command(run_wc_seahorse_cmd())
-        .command(run_detab_seahorse_cmd());
+        .command(run_detab_seahorse_cmd())
+        .command(run_entab_seahorse_cmd());
     run_app(app, env::args().collect(), &app_name)
 }

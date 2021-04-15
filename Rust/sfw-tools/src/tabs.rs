@@ -126,6 +126,12 @@ where
     }
 }
 
+pub fn entab_app() -> App {
+    App::new("entab")
+        .author("Brandon Elam Barker")
+        .action(run_entab_seahorse_action)
+        .command(run_entab_seahorse_cmd())
+}
 const ENTAB_USAGE: &str = "entab [SOURCE_FILE] [DEST_FILE]";
 
 pub fn run_entab_seahorse_cmd() -> Command {

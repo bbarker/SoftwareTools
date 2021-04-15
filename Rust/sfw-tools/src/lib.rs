@@ -34,6 +34,7 @@
 //! - [x] `cp`
 //! - [x] `wc`
 //! - [x] `detab`
+//! - [x] `entab`
 //!
 //! ## Dependencies
 //!

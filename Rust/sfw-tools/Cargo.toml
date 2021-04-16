@@ -41,6 +41,10 @@ path = "src/detab.rs"
 name = "entab"
 path = "src/entab.rs"
 
+[[bin]]
+name = "echo"
+path = "src/echo.rs"
+
 [dependencies]
 # byteorder = "1.4.2"
 fp-core = "0.1.9"

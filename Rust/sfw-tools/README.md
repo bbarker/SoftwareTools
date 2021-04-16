@@ -37,6 +37,7 @@ terms of loosely coupled functions that each does a simple task."*
 - [x] `wc`
 - [x] `detab`
 - [x] `entab`
+- [x] `echo`
 
 ### Dependencies
 

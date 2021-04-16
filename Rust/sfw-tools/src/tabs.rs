@@ -23,7 +23,7 @@ pub fn detab_app() -> App {
         .command(run_detab_seahorse_cmd())
 }
 
-const DETAB_USAGE: &str = "detab [SOURCE_FILE] [DEST_FILE]";
+const DETAB_USAGE: &str = "detab SOURCE_FILE DEST_FILE";
 
 pub fn run_detab_seahorse_cmd() -> Command {
     Command::new("detab")
@@ -132,7 +132,7 @@ pub fn entab_app() -> App {
         .action(run_entab_seahorse_action)
         .command(run_entab_seahorse_cmd())
 }
-const ENTAB_USAGE: &str = "entab [SOURCE_FILE] [DEST_FILE]";
+const ENTAB_USAGE: &str = "entab SOURCE_FILE DEST_FILE";
 
 pub fn run_entab_seahorse_cmd() -> Command {
     Command::new("entab")

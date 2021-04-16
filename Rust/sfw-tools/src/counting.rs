@@ -17,7 +17,7 @@ pub fn wc_app() -> App {
 }
 
 const WC_USAGE: &str = r#"
-wc [[OPTION]]... [FILE]...
+wc [OPTION] FILE
 
 No option implies lines, words and bytes will be printed.
 

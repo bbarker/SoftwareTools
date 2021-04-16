@@ -35,6 +35,7 @@
 //! - [x] `wc`
 //! - [x] `detab`
 //! - [x] `entab`
+//! - [x] `echo`
 //!
 //! ## Dependencies
 //!
@@ -187,7 +188,7 @@
 use std::env;
 use std::io::Error;
 
-use seahorse::App;
+use seahorse::{App, Command, Context};
 
 pub mod bytes_iter;
 pub use bytes_iter::BytesIter;
@@ -226,4 +227,27 @@ pub fn run_app(app: App, args: Vec<String>, arg_err: &str) {
         0 => user_exit(&format!("{}: Zero arguments in run_app", arg_err)),
         _ => app.run(args),
     }
+}
+
+pub fn echo(args: &[String]) {
+    println!("{}", args.join(" "))
+}
+
+pub fn echo_app() -> App {
+    App::new("echo")
+        .author("Brandon Elam Barker")
+        .action(run_echo_seahorse_action)
+        .command(run_echo_seahorse_cmd())
+}
+const ECHO_USAGE: &str = "echo [STRING]";
+
+pub fn run_echo_seahorse_cmd() -> Command {
+    Command::new("echo")
+        .description("echo: prints input arguments separated by a space")
+        .usage(ECHO_USAGE)
+        .action(run_echo_seahorse_action)
+}
+
+pub fn run_echo_seahorse_action(ctxt: &Context) {
+    echo(&ctxt.args);
 }

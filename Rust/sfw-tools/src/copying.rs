@@ -14,7 +14,7 @@ pub fn cp_app() -> App {
         .command(run_cp_seahorse_cmd())
 }
 
-const CP_USAGE: &str = "cp [SOURCE_FILE] [DEST_FILE]";
+const CP_USAGE: &str = "cp SOURCE_FILE DEST_FILE";
 
 pub fn run_cp_seahorse_cmd() -> Command {
     Command::new("cp")

@@ -32,6 +32,14 @@ complexity, verbosity, and the risk of errors. Primary examples are
 out in Software Tools, pp 21, *"The best programs are designed in
 terms of loosely coupled functions that each does a simple task."*
 
+Some other references that refelect functional programming values:
+- page 36, a discussion on `break`: the suggestions also coincide largley
+  with recursive functions.
+- pages 44-45 discuss defensive programming by guarding control variables
+  with safety checks. In functional programming, such control variables
+  often do not appear, so safety checks are unnecessary due to the usage
+  of HOFs being safe by design.
+
 ### Currently Implemented Tools
 - [x] `cp`
 - [x] `wc`

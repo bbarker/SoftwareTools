@@ -30,6 +30,17 @@
 //! out in Software Tools, pp 21, *"The best programs are designed in
 //! terms of loosely coupled functions that each does a simple task."*
 //!
+//! Some other references that refelect functional programming values:
+//! - page 36, a discussion on `break`: the suggestions also coincide largley
+//!   with recursive functions.
+//! - pages 44-45 discuss defensive programming by guarding control variables
+//!   with safety checks. In functional programming, such control variables
+//!   often do not appear, so safety checks are unnecessary due to the usage
+//!   of HOFs being safe by design. Page 45 also points out that non-voluminous
+//!   code listings are easier to debug (which I agree with, and a functional
+//!   style typically enables this), though we also want to warn against making
+//!   code overly terse. Experience is the best guide in this case.
+//!
 //! ## Currently Implemented Tools
 //! - [x] `cp`
 //! - [x] `wc`
@@ -212,6 +223,9 @@ pub use counting::*;
 
 pub mod tabs;
 pub use tabs::*;
+
+pub mod compression;
+pub use compression::*;
 
 pub fn get_args() -> Result<(String, Vec<String>), Error> {
     let mut args_in = env::args();

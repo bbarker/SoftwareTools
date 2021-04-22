@@ -27,8 +27,10 @@ const DETAB_USAGE: &str = "detab SOURCE_FILE DEST_FILE";
 
 pub fn run_detab_seahorse_cmd() -> Command {
     Command::new("detab")
-        .description("detab: remove tabs from a file\
-        ; output to STDOUT is the default")
+        .description(
+            "detab: remove tabs from a file\
+        ; output to STDOUT is the default",
+        )
         .usage(DETAB_USAGE)
         .action(run_detab_seahorse_action)
 }

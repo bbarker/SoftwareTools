@@ -64,6 +64,11 @@
 //!   but will stick with idiomatic Rust where that is obviously simpler.
 //!   An interesting note is that filters are the subject of chapter 2 and much of
 //!   the rest of the book, which are just a particular class of HOFs.
+//! - [peeking_take_while](https://docs.rs/peeking_take_while/)
+//!   A small library that provides the `peeking_take_while` function for
+//!   `Peekable` iterators. This behaves more of how would would expect for
+//!   a `take_while` function compared to the standard `take_while` implementation,
+//!   which will "lose" the first element after a `take_while` streak ends.
 //! - [tailcall](https://docs.rs/tailcall)
 //!   This is a macro that enables tailcall elimination for functions that are
 //!   tail recursive. In other words, instead of writing loops, we can sometimes

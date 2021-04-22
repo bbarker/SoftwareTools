@@ -1,15 +1,14 @@
 // TODO: distinguish between byte-based and unicode-based compression
 
-use std::collections::HashMap;
 use std::convert::TryFrom;
 use std::fs::File;
-use std::io::{Error, Read, Write};
+use std::io::{Error, ErrorKind::Other, Read, Write};
 
+use peeking_take_while::PeekableExt;
 use seahorse::{App, Command, Context};
 use tailcall::tailcall;
 
 use crate::bytes_iter::BytesIter;
-use crate::constants::*;
 use crate::error::*;
 use crate::util::write_u8;
 
@@ -28,8 +27,10 @@ const COMPRESS_USAGE: &str = "compress SOURCE_FILE DEST_FILE";
 
 pub fn run_compress_seahorse_cmd() -> Command {
     Command::new("compress")
-        .description("compress: adjacent redundancy compression\
-        ; output to STDOUT is the default")
+        .description(
+            "compress: adjacent redundancy compression\
+        ; output to STDOUT is the default",
+        )
         .usage(COMPRESS_USAGE)
         .action(run_compress_seahorse_action)
 }
@@ -57,13 +58,7 @@ pub fn compress<W: Write>(src: &str, mut f_out: W) -> Result<(), Error> {
     let f_in = File::open(&src).sfw_err("Couldn't open source")?;
     let f_in_iter = BytesIter::new(f_in, MAX_CHUNK_SIZE);
     let mut out_buf: Vec<u8> = Vec::with_capacity(MAX_CHUNK_SIZE);
-    compress_go(
-        &mut f_out,
-        f_in_iter,
-        vec![].into_iter(),
-        &mut out_buf,
-        0,
-    )
+    compress_go(&mut f_out, f_in_iter, vec![].into_iter(), &mut out_buf)
 }
 
 // This implementation does not compress across boundaries in byte chunks,
@@ -75,7 +70,6 @@ fn compress_go<'a, R, W>(
     mut bytes_iter: BytesIter<R>,
     mut buf_iter: std::vec::IntoIter<u8>,
     out_buf: &mut Vec<u8>,
-    tab_pos: usize,
 ) -> Result<(), Error>
 where
     R: Read,
@@ -83,36 +77,65 @@ where
 {
     match buf_iter.next() {
         Some(char) => {
-            let char_streak = &mut buf_iter.take_while(|c| c == char).collect::<Vec<u8>>();
-            char_streak.add(char);
-
+            let char_streak = &mut buf_iter
+                .by_ref()
+                .peekable()
+                .peeking_take_while(|c| *c == char)
+                .collect::<Vec<u8>>();
+            char_streak.push(char);
             if char_streak.len() >= THRESH {
                 write_u8(f_out, RCODE)?;
                 write_u8(f_out, char)?;
-                let streak_len = u8::try_from(char_streak.len())?;
-                write_u8(f_out, streak_len)
+                let char_streak_len = char_streak.len();
+                let streak_len =
+                    u8::try_from(char_streak_len).map_err(|_| {
+                        Error::new(
+                            Other,
+                            format!(
+                                "Couldn't convert char_streak_len '{}' to a u8",
+                                char_streak_len
+                            ),
+                        )
+                    })?;
+                write_u8(f_out, streak_len)?;
             } else {
-                // TODO
-
-                // let spc_count = tab_pos_to_space(tab_cnf, tab_pos);
-                // f_out.write_all(&SPACE_ARRAY[0..spc_count])?;
-                // tab_pos + 1
+                out_buf.append(char_streak);
+                if out_buf.len() + THRESH >= MAX_CHUNK_SIZE {
+                    wite_buf_out(out_buf, f_out)?;
+                }
             }
-
-            compress_go(tab_cnf, f_out, bytes_iter, buf_iter, tab_pos_new)
+            compress_go(f_out, bytes_iter, buf_iter, out_buf)
         }
         None => {
             match bytes_iter.next() {
                 Some(buf_new) => {
                     let buf_iter = buf_new?.into_iter(); //shadow
-                    compress_go(tab_cnf, f_out, bytes_iter, buf_iter, tab_pos)
+                    compress_go(f_out, bytes_iter, buf_iter, out_buf)
                 }
-                None => Ok(()), /* Finished */
+                None => wite_buf_out(out_buf, f_out), /* Finished */
             }
         }
     }
 }
 
+fn wite_buf_out<W: Write>(
+    out_buf: &mut Vec<u8>,
+    f_out: &mut W,
+) -> Result<(), Error> {
+    let out_len = out_buf.len();
+    let out_len = u8::try_from(out_len).map_err(|_| {
+        Error::new(
+            Other,
+            format!("Couldn't convert out_len '{}' to a u8", out_len),
+        )
+    })?;
+    write_u8(f_out, out_len)?;
+    f_out.write_all(out_buf)?;
+    out_buf.clear();
+    Ok(())
+}
+
+/*
 pub fn decompress_app() -> App {
     App::new("decompress")
         .author("Brandon Elam Barker")
@@ -216,3 +239,4 @@ where
         }
     }
 }
+ */

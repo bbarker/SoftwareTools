@@ -41,7 +41,7 @@ pub fn run_detab_seahorse_action(ctxt: &Context) {
     let f_out: Box<dyn Write> = match args.next() {
         Some(dst) => Box::new(
             File::create(&dst)
-                .user_err(&*format!("Couldn't open destination: {}", &dst)),
+                .user_err(&format!("Couldn't open destination: {}", &dst)),
         ),
         None => Box::new(std::io::stdout()),
     };
@@ -153,7 +153,7 @@ pub fn run_entab_seahorse_action(ctxt: &Context) {
     let f_out: Box<dyn Write> = match args.next() {
         Some(dst) => Box::new(
             File::create(&dst)
-                .user_err(&*format!("Couldn't open destination: {}", &dst)),
+                .user_err(&format!("Couldn't open destination: {}", &dst)),
         ),
         None => Box::new(std::io::stdout()),
     };

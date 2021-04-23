@@ -41,7 +41,7 @@ pub fn run_compress_seahorse_action(ctxt: &Context) {
     let f_out: Box<dyn Write> = match args.next() {
         Some(dst) => Box::new(
             File::create(&dst)
-                .user_err(&*format!("Couldn't open destination: {}", &dst)),
+                .user_err(&format!("Couldn't open destination: {}", &dst)),
         ),
         None => Box::new(std::io::stdout()),
     };
@@ -55,7 +55,8 @@ pub fn run_compress(src: &str, dst: Box<dyn Write>) {
 }
 
 pub fn compress<W: Write>(src: &str, mut f_out: W) -> Result<(), Error> {
-    let f_in = File::open(&src).sfw_err("Couldn't open source")?;
+    let f_in =
+        File::open(&src).sfw_err(&format!("Couldn't open source '{}'", src))?;
     let f_in_iter = BytesIter::new(f_in, MAX_CHUNK_SIZE);
     let mut out_buf: Vec<u8> = Vec::with_capacity(MAX_CHUNK_SIZE);
     compress_go(&mut f_out, f_in_iter, vec![].into_iter(), &mut out_buf)
@@ -101,7 +102,7 @@ where
             } else {
                 out_buf.append(char_streak);
                 if out_buf.len() + THRESH >= MAX_CHUNK_SIZE {
-                    wite_buf_out(out_buf, f_out)?;
+                    write_buf_out(out_buf, f_out)?;
                 }
             }
             compress_go(f_out, bytes_iter, buf_iter, out_buf)
@@ -112,13 +113,13 @@ where
                     let buf_iter = buf_new?.into_iter(); //shadow
                     compress_go(f_out, bytes_iter, buf_iter, out_buf)
                 }
-                None => wite_buf_out(out_buf, f_out), /* Finished */
+                None => write_buf_out(out_buf, f_out), /* Finished */
             }
         }
     }
 }
 
-fn wite_buf_out<W: Write>(
+fn write_buf_out<W: Write>(
     out_buf: &mut Vec<u8>,
     f_out: &mut W,
 ) -> Result<(), Error> {
@@ -160,7 +161,7 @@ pub fn run_decompress_seahorse_action(ctxt: &Context) {
     let f_out: Box<dyn Write> = match args.next() {
         Some(dst) => Box::new(
             File::create(&dst)
-                .user_err(&*format!("Couldn't open destination: {}", &dst)),
+                .user_err(&format!("Couldn't open destination: {}", &dst)),
         ),
         None => Box::new(std::io::stdout()),
     };

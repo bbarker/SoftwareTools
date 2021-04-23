@@ -45,6 +45,10 @@ path = "src/entab.rs"
 name = "echo"
 path = "src/echo.rs"
 
+[[bin]]
+name = "compress"
+path = "src/compress.rs"
+
 [dependencies]
 # byteorder = "1.4.2"
 fp-core = "0.1.9"

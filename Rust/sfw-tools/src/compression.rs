@@ -14,7 +14,7 @@ use crate::error::*;
 use crate::util::write_u8;
 
 const THRESH: usize = 5;
-const RCODE: u8 = b'0';
+const RCODE: u8 = 0;
 const MAX_CHUNK_SIZE: usize = 255;
 
 pub fn compress_app() -> App {

@@ -85,6 +85,7 @@ where
                 .collect::<Vec<u8>>();
             char_streak.push(char);
             if char_streak.len() >= THRESH {
+                eprintln!("char_streak.len() is {}", char_streak.len()); // FIXME: DEBUG
                 write_u8(f_out, RCODE)?;
                 write_u8(f_out, char)?;
                 let char_streak_len = char_streak.len();

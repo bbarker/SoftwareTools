@@ -3,6 +3,7 @@
 use std::convert::TryFrom;
 use std::fs::File;
 use std::io::{Error, ErrorKind::Other, Read, Write};
+use std::iter::Peekable;
 
 use peeking_take_while::PeekableExt;
 use seahorse::{App, Command, Context};
@@ -59,7 +60,12 @@ pub fn compress<W: Write>(src: &str, mut f_out: W) -> Result<(), Error> {
         File::open(&src).sfw_err(&format!("Couldn't open source '{}'", src))?;
     let f_in_iter = BytesIter::new(f_in, MAX_CHUNK_SIZE);
     let mut out_buf: Vec<u8> = Vec::with_capacity(MAX_CHUNK_SIZE);
-    compress_go(&mut f_out, f_in_iter, vec![].into_iter(), &mut out_buf)
+    compress_go(
+        &mut f_out,
+        f_in_iter,
+        vec![].into_iter().peekable(),
+        &mut out_buf,
+    )
 }
 
 // This implementation does not compress across boundaries in byte chunks,
@@ -69,7 +75,7 @@ pub fn compress<W: Write>(src: &str, mut f_out: W) -> Result<(), Error> {
 fn compress_go<'a, R, W>(
     f_out: &mut W,
     mut bytes_iter: BytesIter<R>,
-    mut buf_iter: std::vec::IntoIter<u8>,
+    mut buf_iter: Peekable<std::vec::IntoIter<u8>>,
     out_buf: &mut Vec<u8>,
 ) -> Result<(), Error>
 where
@@ -80,7 +86,6 @@ where
         Some(char) => {
             let char_streak = &mut buf_iter
                 .by_ref()
-                .peekable()
                 .peeking_take_while(|c| *c == char)
                 .collect::<Vec<u8>>();
             char_streak.push(char);
@@ -111,7 +116,7 @@ where
         None => {
             match bytes_iter.next() {
                 Some(buf_new) => {
-                    let buf_iter = buf_new?.into_iter(); //shadow
+                    let buf_iter = buf_new?.into_iter().peekable(); //shadow
                     compress_go(f_out, bytes_iter, buf_iter, out_buf)
                 }
                 None => write_buf_out(out_buf, f_out), /* Finished */

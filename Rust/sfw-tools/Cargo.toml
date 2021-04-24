@@ -45,9 +45,14 @@ path = "src/entab.rs"
 name = "echo"
 path = "src/echo.rs"
 
+[[bin]]
+name = "compress"
+path = "src/compress.rs"
+
 [dependencies]
 # byteorder = "1.4.2"
 fp-core = "0.1.9"
+peeking_take_while = "0.1.2"
 seahorse = "1.1.1"
 tailcall = "0.1.6"
 # tailcall = { git = "https://github.com/alecdotninja/tailcall.git", branch = "rewrite-as-loop"}

@@ -30,12 +30,25 @@
 //! out in Software Tools, pp 21, *"The best programs are designed in
 //! terms of loosely coupled functions that each does a simple task."*
 //!
+//! Some other references that refelect functional programming values:
+//! - page 36, a discussion on `break`: the suggestions also coincide largley
+//!   with recursive functions.
+//! - pages 44-45 discuss defensive programming by guarding control variables
+//!   with safety checks. In functional programming, such control variables
+//!   often do not appear, so safety checks are unnecessary due to the usage
+//!   of HOFs being safe by design. Page 45 also points out that non-voluminous
+//!   code listings are easier to debug (which I agree with, and a functional
+//!   style typically enables this), though we also want to warn against making
+//!   code overly terse. Experience is the best guide in this case.
+//!
 //! ## Currently Implemented Tools
 //! - [x] `cp`
 //! - [x] `wc`
 //! - [x] `detab`
 //! - [x] `entab`
 //! - [x] `echo`
+//! - [ ] `compress`
+//! - [ ] `expand`
 //!
 //! ## Dependencies
 //!
@@ -53,6 +66,11 @@
 //!   but will stick with idiomatic Rust where that is obviously simpler.
 //!   An interesting note is that filters are the subject of chapter 2 and much of
 //!   the rest of the book, which are just a particular class of HOFs.
+//! - [peeking_take_while](https://docs.rs/peeking_take_while/)
+//!   A small library that provides the `peeking_take_while` function for
+//!   `Peekable` iterators. This behaves more of how would would expect for
+//!   a `take_while` function compared to the standard `take_while` implementation,
+//!   which will "lose" the first element after a `take_while` streak ends.
 //! - [tailcall](https://docs.rs/tailcall)
 //!   This is a macro that enables tailcall elimination for functions that are
 //!   tail recursive. In other words, instead of writing loops, we can sometimes
@@ -212,6 +230,9 @@ pub use counting::*;
 
 pub mod tabs;
 pub use tabs::*;
+
+pub mod compression;
+pub use compression::*;
 
 pub fn get_args() -> Result<(String, Vec<String>), Error> {
     let mut args_in = env::args();

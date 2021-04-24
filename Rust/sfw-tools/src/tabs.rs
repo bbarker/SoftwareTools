@@ -27,7 +27,10 @@ const DETAB_USAGE: &str = "detab SOURCE_FILE DEST_FILE";
 
 pub fn run_detab_seahorse_cmd() -> Command {
     Command::new("detab")
-        .description("detab: remove tabs from a file; output to STDOUT")
+        .description(
+            "detab: remove tabs from a file\
+        ; output to STDOUT is the default",
+        )
         .usage(DETAB_USAGE)
         .action(run_detab_seahorse_action)
 }
@@ -38,7 +41,7 @@ pub fn run_detab_seahorse_action(ctxt: &Context) {
     let f_out: Box<dyn Write> = match args.next() {
         Some(dst) => Box::new(
             File::create(&dst)
-                .user_err(&*format!("Couldn't open destination: {}", &dst)),
+                .user_err(&format!("Couldn't open destination: {}", &dst)),
         ),
         None => Box::new(std::io::stdout()),
     };
@@ -77,7 +80,7 @@ pub fn tab_pos_to_space(tab_config: &TabConf, pos: usize) -> usize {
 // TODO: we need dynamically allocated, fixed-sized arrays:
 //       https://github.com/rust-lang/rust/issues/48055
 //
-// A good soultion would be to allocate a vector of spaces,
+// A good solution would be to allocate a vector of spaces,
 // grow as necessary, and take a slice. But for now, we can simply
 // allocate a constant array:
 
@@ -137,7 +140,8 @@ const ENTAB_USAGE: &str = "entab SOURCE_FILE DEST_FILE";
 pub fn run_entab_seahorse_cmd() -> Command {
     Command::new("entab")
         .description(
-            "entab: replace spaces with tabs in a file; output to STDOUT",
+            "entab: replace spaces with tabs in a file\
+            ; output to STDOUT is the default",
         )
         .usage(ENTAB_USAGE)
         .action(run_entab_seahorse_action)
@@ -149,7 +153,7 @@ pub fn run_entab_seahorse_action(ctxt: &Context) {
     let f_out: Box<dyn Write> = match args.next() {
         Some(dst) => Box::new(
             File::create(&dst)
-                .user_err(&*format!("Couldn't open destination: {}", &dst)),
+                .user_err(&format!("Couldn't open destination: {}", &dst)),
         ),
         None => Box::new(std::io::stdout()),
     };

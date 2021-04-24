@@ -106,10 +106,10 @@ where
                     })?;
                 write_u8(f_out, streak_len)?;
             } else {
-                out_buf.append(char_streak);
-                if out_buf.len() + THRESH >= MAX_CHUNK_SIZE {
+                if out_buf.len() + char_streak.len() > MAX_CHUNK_SIZE {
                     write_buf_out(out_buf, f_out)?;
                 }
+                out_buf.append(char_streak);
             }
             compress_go(f_out, bytes_iter, buf_iter, out_buf)
         }

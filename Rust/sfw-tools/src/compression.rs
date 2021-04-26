@@ -1,5 +1,11 @@
 // TODO: distinguish between byte-based and unicode-based compression
 
+/*
+This entire file used tabs.rs as a starting point, and the structure remains similar.
+Instead of detab/entab, we have compress/expand. Both are filters, and both use
+many of the same local structure, data structures, user interfaces, etc.
+ */
+
 use std::convert::TryFrom;
 use std::fs::File;
 use std::io::{Error, ErrorKind::Other, Read, Write};
@@ -142,28 +148,27 @@ fn write_buf_out<W: Write>(
     Ok(())
 }
 
-/*
-pub fn decompress_app() -> App {
-    App::new("decompress")
+pub fn expand_app() -> App {
+    App::new("expand")
         .author("Brandon Elam Barker")
-        .action(run_decompress_seahorse_action)
-        .command(run_decompress_seahorse_cmd())
+        .action(run_expand_seahorse_action)
+        .command(run_expand_seahorse_cmd())
 }
-const decompress_USAGE: &str = "decompress SOURCE_FILE DEST_FILE";
+const EXPAND_USAGE: &str = "expand SOURCE_FILE DEST_FILE";
 
-pub fn run_decompress_seahorse_cmd() -> Command {
-    Command::new("decompress")
+pub fn run_expand_seahorse_cmd() -> Command {
+    Command::new("expand")
         .description(
-            "decompress: replace spaces with tabs in a file\
+            "expand: replace spaces with tabs in a file\
             ; output to STDOUT is the default",
         )
-        .usage(decompress_USAGE)
-        .action(run_decompress_seahorse_action)
+        .usage(EXPAND_USAGE)
+        .action(run_expand_seahorse_action)
 }
 
-pub fn run_decompress_seahorse_action(ctxt: &Context) {
+pub fn run_expand_seahorse_action(ctxt: &Context) {
     let args = &mut ctxt.args.iter();
-    let src = args.next().user_err("decompress: missing source");
+    let src = args.next().user_err("expand: missing source");
     let f_out: Box<dyn Write> = match args.next() {
         Some(dst) => Box::new(
             File::create(&dst)
@@ -171,36 +176,26 @@ pub fn run_decompress_seahorse_action(ctxt: &Context) {
         ),
         None => Box::new(std::io::stdout()),
     };
-    run_decompress(&src, f_out);
+    run_expand(&src, f_out);
 }
 
-/// Convenience function for running decompress in idiomatic fashion
+/// Convenience function for running expand in idiomatic fashion
 /// (i.e.) errors are printed to user and the program exits.
-pub fn run_decompress(src: &str, dst: Box<dyn Write>) {
-    decompress(src, dst).user_err("Error in decompress");
+pub fn run_expand(src: &str, dst: Box<dyn Write>) {
+    expand(src, dst).user_err("Error in expand");
 }
 
-pub fn decompress<W: Write>(src: &str, mut f_out: W) -> Result<(), Error> {
+pub fn expand<W: Write>(src: &str, mut f_out: W) -> Result<(), Error> {
     let f_in = File::open(&src).sfw_err("Couldn't open source")?;
     let f_in_iter = BytesIter::new(f_in, MAX_CHUNK_SIZE);
-    decompress_go(
-        &TabConf::TabConstant(2),
-        &mut f_out,
-        f_in_iter,
-        vec![].into_iter(),
-        0,
-        0,
-    )
+    expand_go(&mut f_out, f_in_iter, vec![].into_iter())
 }
 
 #[tailcall]
-fn decompress_go<'a, R, W>(
-    tab_cnf: &TabConf,
+fn expand_go<'a, R, W>(
     f_out: &mut W,
     mut bytes_iter: BytesIter<R>,
     mut buf_iter: std::vec::IntoIter<u8>,
-    tab_pos: usize,
-    spc_count: usize,
 ) -> Result<(), Error>
 where
     R: Read,
@@ -208,42 +203,44 @@ where
 {
     match buf_iter.next() {
         Some(byte) => {
-            let (tab_pos, spc_count) = match byte {
-                b' ' => (tab_pos + 1, spc_count + 1),
-                b'\n' => (0, 0),
-                b'\t' => (tab_pos + 1, spc_count),
-                _ => (tab_pos, spc_count),
-            };
-            let spaces_for_tab = tab_pos_to_space(tab_cnf, tab_pos);
-            let (tab_pos, spc_count) = if spc_count == spaces_for_tab {
-                write_u8(f_out, b'\t')?;
-                (tab_pos + 1, 0)
-            } else {
-                match byte {
-                    b' ' => (tab_pos, spc_count),
-                    _ => {
-                        f_out.write_all(
-                            &(0..spc_count).map(|_| b' ').collect::<Vec<u8>>(),
-                        )?;
-                        write_u8(f_out, byte)?;
-                        (tab_pos, 0)
+            match byte {
+                0 => {
+                    let repeat_char = buf_iter
+                        .next()
+                        .sfw_err("Couldn't read repeat character")?;
+                    let repeat_count = buf_iter
+                        .next()
+                        .sfw_err("Couldn't read repeat count")?;
+                    f_out.write_all(
+                        &(0..repeat_count)
+                            .map(|_| repeat_char)
+                            .collect::<Vec<u8>>(),
+                    )?;
+                }
+                read_size => {
+                    let read_size = read_size as usize;
+                    let non_repeat_string =
+                        buf_iter.by_ref().take(read_size).collect::<Vec<u8>>();
+                    let str_len = non_repeat_string.len();
+                    if str_len != read_size {
+                        eprintln!(
+                            "Couldn't read chunk of size {}, got {} bytes.",
+                            read_size, str_len
+                        );
                     }
+                    f_out.write_all(&non_repeat_string)?
                 }
             };
-            decompress_go(tab_cnf, f_out, bytes_iter, buf_iter, tab_pos, spc_count)
+            expand_go(f_out, bytes_iter, buf_iter)
         }
         None => {
             match bytes_iter.next() {
                 Some(buf_new) => {
                     let buf_iter = buf_new?.into_iter(); //shadow
-                    decompress_go(
-                        tab_cnf, f_out, bytes_iter, buf_iter, tab_pos,
-                        spc_count,
-                    )
+                    expand_go(f_out, bytes_iter, buf_iter)
                 }
                 None => Ok(()), /* Finished */
             }
         }
     }
 }
- */

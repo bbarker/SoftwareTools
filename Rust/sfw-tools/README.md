@@ -49,6 +49,8 @@ Some other references that refelect functional programming values:
 - [x] `detab`
 - [x] `entab`
 - [x] `echo`
+- [x] `compress`
+- [ ] `expand`
 
 ### Dependencies
 

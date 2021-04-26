@@ -47,7 +47,7 @@
 //! - [x] `detab`
 //! - [x] `entab`
 //! - [x] `echo`
-//! - [ ] `compress`
+//! - [x] `compress`
 //! - [ ] `expand`
 //!
 //! ## Dependencies

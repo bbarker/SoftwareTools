@@ -217,6 +217,9 @@ pub use constants::*;
 pub mod error;
 pub use error::*;
 
+pub mod iter_extra;
+pub use iter_extra::*;
+
 pub mod util;
 pub use util::*;
 

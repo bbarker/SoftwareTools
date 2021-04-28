@@ -17,6 +17,7 @@ use tailcall::tailcall;
 
 use crate::bytes_iter::BytesIter;
 use crate::error::*;
+use crate::iter_extra::*;
 use crate::util::write_u8;
 
 const THRESH: usize = 5;
@@ -220,14 +221,7 @@ where
                 read_size => {
                     let read_size = read_size as usize;
                     let non_repeat_string =
-                        buf_iter.by_ref().take(read_size).collect::<Vec<u8>>();
-                    let str_len = non_repeat_string.len();
-                    if str_len != read_size {
-                        eprintln!(
-                            "Couldn't read chunk of size {}, got {} bytes.",
-                            read_size, str_len
-                        );
-                    }
+                        buf_iter.by_ref().safe_take(read_size)?;
                     f_out.write_all(&non_repeat_string)?
                 }
             };

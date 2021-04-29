@@ -49,6 +49,10 @@ path = "src/echo.rs"
 name = "compress"
 path = "src/compress.rs"
 
+[[bin]]
+name = "expand"
+path = "src/expand.rs"
+
 [dependencies]
 # byteorder = "1.4.2"
 fp-core = "0.1.9"

@@ -32,7 +32,7 @@ impl<R: Read> Iterator for BytesIter<R> {
         match self.buf_reader.fill_buf() {
             Ok(buf) => {
                 if !buf.is_empty() {
-                    self.buf.extend_from_slice(&buf);
+                    self.buf.extend_from_slice(buf);
                     Some(Ok(self.buf.clone()))
                 } else {
                     None

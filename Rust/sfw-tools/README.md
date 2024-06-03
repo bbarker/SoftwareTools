@@ -133,9 +133,7 @@ path were to occur.
 #### Rust on nix
 
 ```plain
-nix-shell -p rustup cargo
-
-
+nix develop
 ```
 
 #### Optimizing for size

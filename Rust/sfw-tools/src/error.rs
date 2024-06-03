@@ -1,12 +1,12 @@
 use std::fmt::{self, Display};
 use std::io::{Error, ErrorKind::*};
-use std::option::NoneError;
 use std::process;
 
 const USER_ERROR_CODE: i32 = 1;
 
-pub struct NoneErrorRich(NoneError);
-const NONE_ERROR_RICH: NoneErrorRich = NoneErrorRich(NoneError);
+// TODO: rework or remove for try_trait_v2
+pub struct NoneErrorRich();
+const NONE_ERROR_RICH: NoneErrorRich = NoneErrorRich();
 //
 impl fmt::Display for NoneErrorRich {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

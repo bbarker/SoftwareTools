@@ -201,7 +201,7 @@
 //!
 
 #![deny(unused_must_use)]
-#![feature(try_trait)]
+#![feature(try_trait_v2)]
 
 use std::env;
 use std::io::Error;

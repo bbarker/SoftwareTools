@@ -27,7 +27,7 @@ pub fn run_cp_seahorse_action(ctxt: &Context) {
     let mut args = ctxt.args.iter();
     let src = args.next().user_err("cp: missing source");
     let dst = args.next().user_err("cp: missing destination");
-    run_cp(&src, &dst);
+    run_cp(src, dst);
 }
 
 /// Convenience function for running cp in idiomatic fashion
@@ -37,7 +37,7 @@ pub fn run_cp(src: &str, dst: &str) {
 }
 
 pub fn cp(src: &str, dst: &str) -> Result<(), Error> {
-    let f_in = File::open(&src).sfw_err("Couldn't open source")?;
+    let f_in = File::open(src).sfw_err("Couldn't open source")?;
     let mut f_in_iter = BytesIter::new(f_in, DEFAULT_BUF_SIZE);
     let mut f_out = File::create(&dst)
         .sfw_err(&*format!("Couldn't open destination: {}", &dst))?;

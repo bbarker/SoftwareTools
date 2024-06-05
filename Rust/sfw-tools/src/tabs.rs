@@ -40,12 +40,12 @@ pub fn run_detab_seahorse_action(ctxt: &Context) {
     let src = args.next().user_err("detab: missing source");
     let f_out: Box<dyn Write> = match args.next() {
         Some(dst) => Box::new(
-            File::create(&dst)
+            File::create(dst)
                 .user_err(&format!("Couldn't open destination: {}", &dst)),
         ),
         None => Box::new(std::io::stdout()),
     };
-    run_detab(&src, f_out);
+    run_detab(src, f_out);
 }
 
 /// Convenience function for running detab in idiomatic fashion
@@ -55,7 +55,7 @@ pub fn run_detab(src: &str, dst: Box<dyn Write>) {
 }
 
 pub fn detab<W: Write>(src: &str, mut f_out: W) -> Result<(), Error> {
-    let f_in = File::open(&src).sfw_err("Couldn't open source")?;
+    let f_in = File::open(src).sfw_err("Couldn't open source")?;
     let f_in_iter = BytesIter::new(f_in, DEFAULT_BUF_SIZE);
     detab_go(
         &TabConf::TabConstant(2),
@@ -152,12 +152,12 @@ pub fn run_entab_seahorse_action(ctxt: &Context) {
     let src = args.next().user_err("entab: missing source");
     let f_out: Box<dyn Write> = match args.next() {
         Some(dst) => Box::new(
-            File::create(&dst)
+            File::create(dst)
                 .user_err(&format!("Couldn't open destination: {}", &dst)),
         ),
         None => Box::new(std::io::stdout()),
     };
-    run_entab(&src, f_out);
+    run_entab(src, f_out);
 }
 
 /// Convenience function for running entab in idiomatic fashion
@@ -167,7 +167,7 @@ pub fn run_entab(src: &str, dst: Box<dyn Write>) {
 }
 
 pub fn entab<W: Write>(src: &str, mut f_out: W) -> Result<(), Error> {
-    let f_in = File::open(&src).sfw_err("Couldn't open source")?;
+    let f_in = File::open(src).sfw_err("Couldn't open source")?;
     let f_in_iter = BytesIter::new(f_in, DEFAULT_BUF_SIZE);
     entab_go(
         &TabConf::TabConstant(2),

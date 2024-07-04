@@ -11,10 +11,6 @@ homepage = "https://github.com/bbarker/SoftwareTools"
 repository = "https://github.com/bbarker/SoftwareTools"
 documentation = "https://docs.rs/sfw-tools"
 
-[profile.release]
-lto = true
-codegen-units = 1
-
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [lib]

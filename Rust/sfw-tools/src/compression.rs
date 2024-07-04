@@ -48,12 +48,12 @@ pub fn run_compress_seahorse_action(ctxt: &Context) {
     let src = args.next().user_err("compress: missing source");
     let f_out: Box<dyn Write> = match args.next() {
         Some(dst) => Box::new(
-            File::create(&dst)
+            File::create(dst)
                 .user_err(&format!("Couldn't open destination: {}", &dst)),
         ),
         None => Box::new(std::io::stdout()),
     };
-    run_compress(&src, f_out);
+    run_compress(src, f_out);
 }
 
 /// Convenience function for running compress in idiomatic fashion
@@ -64,7 +64,7 @@ pub fn run_compress(src: &str, dst: Box<dyn Write>) {
 
 pub fn compress<W: Write>(src: &str, mut f_out: W) -> Result<(), Error> {
     let f_in =
-        File::open(&src).sfw_err(&format!("Couldn't open source '{}'", src))?;
+        File::open(src).sfw_err(&format!("Couldn't open source '{}'", src))?;
     let f_in_iter = BytesIter::new(f_in, MAX_CHUNK_SIZE);
     let mut out_buf: Vec<u8> = Vec::with_capacity(MAX_CHUNK_SIZE);
     compress_go(
@@ -172,12 +172,12 @@ pub fn run_expand_seahorse_action(ctxt: &Context) {
     let src = args.next().user_err("expand: missing source");
     let f_out: Box<dyn Write> = match args.next() {
         Some(dst) => Box::new(
-            File::create(&dst)
+            File::create(dst)
                 .user_err(&format!("Couldn't open destination: {}", &dst)),
         ),
         None => Box::new(std::io::stdout()),
     };
-    run_expand(&src, f_out);
+    run_expand(src, f_out);
 }
 
 /// Convenience function for running expand in idiomatic fashion
@@ -187,7 +187,7 @@ pub fn run_expand(src: &str, dst: Box<dyn Write>) {
 }
 
 pub fn expand<W: Write>(src: &str, mut f_out: W) -> Result<(), Error> {
-    let f_in = File::open(&src).sfw_err("Couldn't open source")?;
+    let f_in = File::open(src).sfw_err("Couldn't open source")?;
     let f_in_iter = BytesIter::new(f_in, MAX_CHUNK_SIZE);
     expand_go(&mut f_out, f_in_iter, vec![].into_iter())
 }

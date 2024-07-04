@@ -1,1 +1,10 @@
-Rust/sfw-tools/Cargo.toml
+[workspace]
+members = [
+    "Rust/sfw-tools",
+    # "Rust/func-iter",
+]
+
+[profile.release]
+lto = true
+codegen-units = 1
+

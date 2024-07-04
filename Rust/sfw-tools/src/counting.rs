@@ -59,21 +59,21 @@ pub fn run_wc_seahorse_action(ctxt: &Context) {
     let do_all = do_all || (!do_lines && !do_words && !do_bytes);
     let counts: Counts;
     if do_all {
-        counts = wc_all(&src).user_err("Error in wc_all");
+        counts = wc_all(src).user_err("Error in wc_all");
     } else {
         let mut build_counts = Counts::null();
         if do_bytes {
-            build_counts = wc_bytes(&src)
+            build_counts = wc_bytes(src)
                 .map(|b| build_counts.bytes(b))
                 .user_err("Error in wc_bytes");
         }
         if do_words {
-            build_counts = wc_words(&src)
+            build_counts = wc_words(src)
                 .map(|b| build_counts.words(b))
                 .user_err("Error in wc_words");
         }
         if do_lines {
-            build_counts = wc_lines(&src)
+            build_counts = wc_lines(src)
                 .map(|b| build_counts.lines(b))
                 .user_err("Error in wc_lines");
         }
@@ -90,8 +90,8 @@ pub fn run_wc_lines(src: &str) {
 }
 
 pub fn wc_lines(src: &str) -> Result<usize, Error> {
-    let f_in = File::open(&src)
-        .sfw_err(&*format!("Couldn't open source: {}", &src))?;
+    let f_in =
+        File::open(src).sfw_err(&format!("Couldn't open source: {}", &src))?;
     wc_lines_file(&f_in)
 }
 
@@ -114,8 +114,8 @@ pub fn run_wc_bytes(src: &str) {
 }
 
 pub fn wc_bytes(src: &str) -> Result<usize, Error> {
-    let f_in = File::open(&src)
-        .sfw_err(&*format!("Couldn't open source: {}", &src))?;
+    let f_in =
+        File::open(src).sfw_err(&format!("Couldn't open source: {}", &src))?;
     wc_bytes_file(&f_in)
 }
 
@@ -132,8 +132,8 @@ pub fn run_wc_words(src: &str) {
 }
 
 pub fn wc_words(src: &str) -> Result<usize, Error> {
-    let f_in = File::open(&src)
-        .sfw_err(&*format!("Couldn't open source: {}", &src))?;
+    let f_in =
+        File::open(src).sfw_err(&format!("Couldn't open source: {}", &src))?;
     wc_words_file(&f_in)
 }
 
@@ -368,7 +368,7 @@ impl FluxMay {
         ))
     }
 
-    fn to_counts(&self) -> Counts {
+    fn counts(&self) -> Counts {
         match self {
             FluxSome(flux) => Counts::new(flux.bytes, flux.words, flux.lines),
             FluxEmpty => Counts::empty(),
@@ -429,8 +429,8 @@ pub fn run_wc_all(src: &str) {
 }
 
 pub fn wc_all(src: &str) -> Result<Counts, Error> {
-    let f_in = File::open(&src)
-        .sfw_err(&*format!("Couldn't open source: {}", &src))?;
+    let f_in =
+        File::open(src).sfw_err(&format!("Couldn't open source: {}", &src))?;
     wc_all_file(&f_in)
 }
 
@@ -442,7 +442,7 @@ pub fn wc_all_file(f_in: &File) -> Result<Counts, Error> {
                 FluxMay::from(b_slice?.as_slice()),
             ))
         })
-        .map(|f| FluxMay::to_counts(&f))
+        .map(|f| FluxMay::counts(&f))
 }
 
 #[cfg(test)]

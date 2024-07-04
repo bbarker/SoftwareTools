@@ -1,16 +1,15 @@
 use std::fmt::{self, Display};
 use std::io::{Error, ErrorKind::*};
-use std::option::NoneError;
 use std::process;
 
 const USER_ERROR_CODE: i32 = 1;
 
-pub struct NoneErrorRich(NoneError);
-const NONE_ERROR_RICH: NoneErrorRich = NoneErrorRich(NoneError);
+pub struct NoneErrorRich<'a>(&'a str);
+const NONE_ERROR_DEFAULT: NoneErrorRich = NoneErrorRich("Can't unwrap None");
 //
-impl fmt::Display for NoneErrorRich {
+impl<'a> fmt::Display for NoneErrorRich<'a> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "")
+        write!(f, "{}", self.0)
     }
 }
 
@@ -41,9 +40,9 @@ impl<T, E: Display> SfwRes<T, E> for Result<T, E> {
     }
 }
 
-impl<T> SfwRes<T, NoneErrorRich> for Option<T> {
-    fn unwrap_or_else<F: FnOnce(NoneErrorRich) -> T>(self, op: F) -> T {
-        self.unwrap_or_else(|| op(NONE_ERROR_RICH))
+impl<'a, T> SfwRes<T, NoneErrorRich<'a>> for Option<T> {
+    fn unwrap_or_else<F: FnOnce(NoneErrorRich<'a>) -> T>(self, op: F) -> T {
+        self.unwrap_or_else(|| op(NONE_ERROR_DEFAULT))
     }
 }
 

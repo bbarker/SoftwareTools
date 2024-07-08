@@ -24,6 +24,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "func-iter"
+version = "0.1.0"
+dependencies = [
+ "cargo-husky",
+ "fp-core",
+ "peeking_take_while",
+ "tailcall",
+]
+
+[[package]]
 name = "itertools"
 version = "0.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"

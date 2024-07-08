@@ -1,7 +1,7 @@
 [workspace]
 members = [
     "Rust/sfw-tools",
-    # "Rust/func-iter",
+    "Rust/func-iter",
 ]
 
 [profile.release]

@@ -1,59 +1,27 @@
 [package]
-name = "sfw-tools"
-version = "0.4.0"
+name = "func-iter"
+version = "0.1.0"
 authors = ["Brandon Barker <brandon.barker@gmail.com>"]
 edition = "2021"
 license = "MPL-2.0"
 # license-file = "LICENSE.txt"
-description  = "Functions and programs from the book Software Tools"
+description  = "Functional programming utitilies for iterators and collections"
 categories = ["command-line-utilities"]
 homepage = "https://github.com/bbarker/SoftwareTools"
 repository = "https://github.com/bbarker/SoftwareTools"
-documentation = "https://docs.rs/sfw-tools"
+documentation = "https://docs.rs/func-iter"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [lib]
-name = "sfwtools"
+name = "funciter"
 path = "src/lib.rs"
 
-[[bin]]
-name = "sfwtools"
-path = "src/main.rs"
-
-[[bin]]
-name = "cp"
-path = "src/cp.rs"
-
-[[bin]]
-name = "wc"
-path = "src/wc.rs"
-
-[[bin]]
-name = "detab"
-path = "src/detab.rs"
-
-[[bin]]
-name = "entab"
-path = "src/entab.rs"
-
-[[bin]]
-name = "echo"
-path = "src/echo.rs"
-
-[[bin]]
-name = "compress"
-path = "src/compress.rs"
-
-[[bin]]
-name = "expand"
-path = "src/expand.rs"
 
 [dependencies]
 # byteorder = "1.4.2"
 fp-core = "0.1.9"
 peeking_take_while = "0.1.2"
-seahorse = "1.1.1"
 tailcall = "0.1.6"
 # tailcall = { git = "https://github.com/alecdotninja/tailcall.git", branch = "rewrite-as-loop"}
 # im = "15.0.0"

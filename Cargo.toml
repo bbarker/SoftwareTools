@@ -3,6 +3,7 @@ members = [
     "Rust/sfw-tools",
     "Rust/func-iter",
 ]
+resolver = "1"
 
 [profile.release]
 lto = true

@@ -1,24 +1,5 @@
 use std::cmp::Ordering;
 
-#[macro_export]
-macro_rules! range_to_vec {
-    ($start:expr, $end:expr) => {{
-        ($start..$end)
-            .map(|ii| ii.to_string())
-            .collect::<Vec<String>>()
-    }};
-}
-
-#[test]
-fn range_to_string_vec() {
-    const START: i32 = 1;
-    const END: i32 = 5;
-
-    let vec_of_strings = range_to_vec!(START, END);
-
-    assert_eq!(vec_of_strings, vec!["1", "2", "3", "4"])
-}
-
 pub trait OrderedIterable<T: Ord>: Sized {
     fn sorted(self) -> Self;
 }
